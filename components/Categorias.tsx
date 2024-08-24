@@ -46,10 +46,7 @@ export default function Categorias({
               >
                 <Image source={cat.imagen} style={styles.image} />
               </View>
-              <Text
-                className="text-neutral-600"
-                style={{ fontSize: hp(1.6), color: "#4c4c4c" }}
-              >
+              <Text style={{ fontSize: hp(1.7), color: "white" }}>
                 {cat.tipo}
               </Text>
             </TouchableOpacity>

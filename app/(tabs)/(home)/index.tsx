@@ -4,6 +4,8 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  ImageBackground,
+  StatusBar,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import TrendingRecipes from "@/components/TrendingRecipes";
@@ -61,7 +63,12 @@ const index = () => {
   };
 
   return (
-    <View className={"flex-1 pt-4"} style={{ backgroundColor: "#F5C26B" }}>
+    <ImageBackground
+      source={require("@/assets/images/madera4.jpg")}
+      style={{ flex: 1 }}
+      width={100}
+    >
+      <StatusBar barStyle={"dark-content"} />
       <SafeAreaView>
         <View className="pb-4 flex-row justify-between items-center mx-4 border-solid border-b-stone-900 ">
           <FontAwesome6 name="bars-staggered" size={24} color="white" />
@@ -70,7 +77,7 @@ const index = () => {
             <Text style={styles.text}>G</Text>ran{" "}
             <Text style={styles.text}>C</Text>hef
           </Text>
-          <TouchableOpacity onPress={() => router.push("/(tabs)/explore")}>
+          <TouchableOpacity onPress={() => router.push("/explore")}>
             <FontAwesome name="search" size={24} color="white" />
           </TouchableOpacity>
         </View>
@@ -99,7 +106,7 @@ const index = () => {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </View>
+    </ImageBackground>
   );
 };
 

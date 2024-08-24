@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Dimensions,
   Modal,
+  ImageBackground,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { foodData, foodDataProps } from "@/data";
@@ -16,11 +17,22 @@ import { StatusBar } from "expo-status-bar";
 import {
   ChevronLeftIcon,
   HeartIcon,
-  ClockIcon,
+  BoltIcon,
   FireIcon,
   UsersIcon,
   Square3Stack3DIcon,
+  TvIcon,
 } from "react-native-heroicons/outline";
+
+interface RecipeStep {
+  title: string;
+  stepNumber: number;
+  totalSteps: number;
+  texto: string;
+  verbosClave: string[]; // Make sure this matches the usage in your component
+}
+
+import { categorias, categoriasProps } from "@/data/categorias";
 
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import {
@@ -35,6 +47,28 @@ import { glosario, glosarioProps } from "@/data/glosario";
 
 import { acciones, accionesProps } from "@/data/action";
 
+import { dificultades } from "@/components/Dificultad";
+
+const getNumberDificultad = (value: string): number => {
+  switch (value) {
+    case "Fácil":
+      return 1;
+    case "Intermedio":
+      return 2;
+    case "Avanzado":
+      return 3;
+    case "Desafiante":
+      return 4;
+    default:
+      return 0; // Or throw an error if you prefer
+  }
+};
+
+const getCategoryImage = (value: string): any => {
+  const category = categorias.find((cat) => cat.tipo === value);
+  return category ? category.imagen : categorias[6].imagen; // Return the image if found, otherwise return null
+};
+
 const RecipeDetail = () => {
   const { slug } = useLocalSearchParams();
   const recipe = foodData.find((r) => r.slug === slug);
@@ -48,9 +82,8 @@ const RecipeDetail = () => {
   const [selectedDefinition, setSelectedDefinition] = useState<string | null>(
     null
   );
-  const [recipeSteps, setRecipeSteps] = useState<
-    { texto: string; verbos_clave: string[] }[]
-  >([]);
+  const [recipeSteps, setRecipeSteps] = useState<RecipeStep[]>([]);
+
   const [currentStep, setCurrentStep] = useState(0);
 
   const router = useRouter();
@@ -103,15 +136,20 @@ const RecipeDetail = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView
-        className="bg-white flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 30 }}
-      >
-        <StatusBar backgroundColor={colorStatusBar} />
+    <ImageBackground
+      source={require("@/assets/images/madera4.jpg")}
+      style={{ flex: 1 }}
+      width={100}
+    >
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          // className="bg-white flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 30 }}
+        >
+          <StatusBar backgroundColor={colorStatusBar} />
 
-        {/* <Stack.Screen
+          {/* <Stack.Screen
           options={{
             headerShown: true,
             title: recipe.nombre_receta,
@@ -123,394 +161,415 @@ const RecipeDetail = () => {
           }}
         /> */}
 
-        {/* Recipe image */}
-        <View className="flex-row justify-center">
-          <Image
-            source={{ uri: recipe.media[0] }}
-            style={{
-              width: "100%",
-              height: hp(25),
-              borderRadius: 53,
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
-              borderBottomLeftRadius: 40,
-              borderBottomRightRadius: 40,
-              resizeMode: "cover",
-            }}
-          />
-        </View>
-
-        {/* Back and Favorite buttons */}
-        <Animated.View
-          entering={FadeIn.delay(200).duration(1000)}
-          className="w-full absolute flex-row justify-between items-center pt-14"
-        >
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="p-2 rounded-full ml-5 bg-white "
-          >
-            <ChevronLeftIcon size={hp(3.5)} strokeWidth={4.5} color="#fbbf24" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setIsFavourite(!isFavourite)}
-            className="p-2 rounded-full mr-5 bg-white"
-          >
-            <HeartIcon
-              size={hp(3.5)}
-              strokeWidth={4.5}
-              color={isFavourite ? "red" : "gray"}
+          {/* Recipe image */}
+          <View className="flex-row justify-center">
+            <Image
+              source={{ uri: recipe.media[0] }}
+              style={{
+                width: "100%",
+                height: hp(25),
+                borderRadius: 53,
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 0,
+                borderBottomLeftRadius: 40,
+                borderBottomRightRadius: 40,
+                resizeMode: "cover",
+              }}
             />
-          </TouchableOpacity>
-        </Animated.View>
+          </View>
 
-        {/* Meal description */}
-        <View className="px-4 flex justify-between space-y-4 pt-8">
-          {/* Name and Area */}
+          {/* Back and Favorite buttons */}
           <Animated.View
-            entering={FadeInDown.duration(700).springify().damping(12)}
-            className="space-y-2"
+            entering={FadeIn.delay(200).duration(1000)}
+            className="w-full absolute flex-row justify-between items-center pt-14"
           >
-            <Text
-              style={{ fontSize: hp(3) }}
-              className="font-bold flex-1 text-neutral-700"
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="p-2 rounded-full ml-5 bg-white "
             >
-              {recipe.nombre_receta}
-            </Text>
-            <Text
-              style={{ fontSize: hp(2) }}
-              className="font-medium flex-1 text-neutral-500"
+              <ChevronLeftIcon
+                size={hp(3.5)}
+                strokeWidth={4.5}
+                color="#fbbf24"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setIsFavourite(!isFavourite)}
+              className="p-2 rounded-full mr-5 bg-white"
             >
-              {recipe.tipo}
-            </Text>
+              <HeartIcon
+                size={hp(3.5)}
+                strokeWidth={4.5}
+                color={isFavourite ? "red" : "gray"}
+              />
+            </TouchableOpacity>
           </Animated.View>
 
-          {/* Miscellaneous information */}
-          <Animated.View
-            entering={FadeInDown.delay(100)
-              .duration(700)
-              .springify()
-              .damping(12)}
-            className="flex-row justify-around"
-          >
-            <View className="flex rounded-full bg-amber-300 p-2">
-              <View
-                style={{ height: hp(6.5), width: hp(6.5) }}
-                className="bg-white rounded-full flex items-center justify-center"
-              >
-                <ClockIcon size={hp(4)} strokeWidth={2.5} color="#525252" />
-              </View>
-              <View className="flex items-center py-2 space-y-1">
-                <Text
-                  style={{ fontSize: hp(2) }}
-                  className="font-bold text-neutral-700"
-                >
-                  35
-                </Text>
-                <Text
-                  style={{ fontSize: hp(1.3) }}
-                  className="font-bold text-neutral-700"
-                >
-                  Mins
-                </Text>
-              </View>
-            </View>
-            <View className="flex rounded-full bg-amber-300 p-2">
-              <View
-                style={{ height: hp(6.5), width: hp(6.5) }}
-                className="bg-white rounded-full flex items-center justify-center"
-              >
-                <UsersIcon size={hp(4)} strokeWidth={2.5} color="#525252" />
-              </View>
-              <View className="flex items-center py-2 space-y-1">
-                <Text
-                  style={{ fontSize: hp(2) }}
-                  className="font-bold text-neutral-700"
-                >
-                  03
-                </Text>
-                <Text
-                  style={{ fontSize: hp(1.3) }}
-                  className="font-bold text-neutral-700"
-                >
-                  Servings
-                </Text>
-              </View>
-            </View>
-            <View className="flex rounded-full bg-amber-300 p-2">
-              <View
-                style={{ height: hp(6.5), width: hp(6.5) }}
-                className="bg-white rounded-full flex items-center justify-center"
-              >
-                <FireIcon size={hp(4)} strokeWidth={2.5} color="#525252" />
-              </View>
-              <View className="flex items-center py-2 space-y-1">
-                <Text
-                  style={{ fontSize: hp(2) }}
-                  className="font-bold text-neutral-700"
-                >
-                  103
-                </Text>
-                <Text
-                  style={{ fontSize: hp(1.3) }}
-                  className="font-bold text-neutral-700"
-                >
-                  Cal
-                </Text>
-              </View>
-            </View>
-          </Animated.View>
-
-          {/* Ingredients */}
-          <Animated.View
-            entering={FadeInDown.delay(200)
-              .duration(700)
-              .springify()
-              .damping(12)}
-            className="space-y-4"
-          >
-            <Text
-              style={{ fontSize: hp(2.5) }}
-              className="font-bold flex-1 text-neutral-700"
-            >
-              Ingredientes:
-            </Text>
-            <View className="space-y-2 ml-3">
-              {Object.keys(recipe.ingredientes).map((key) => (
-                <View key={key} className="space-y-1">
-                  <Text
-                    style={{ fontSize: hp(1.7) }}
-                    className="font-bold text-neutral-700"
-                  >
-                    {key}
-                  </Text>
-                  {recipe.ingredientes[key].map((ingredient, i) => (
-                    <View key={i} className="flex-row space-x-4">
-                      <View
-                        style={{ height: hp(1.5), width: hp(1.5) }}
-                        className="bg-amber-300 rounded-full"
-                      />
-                      <Text
-                        style={{ fontSize: hp(1.7) }}
-                        className="font-medium text-neutral-600"
-                      >
-                        {ingredient}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              ))}
-            </View>
-          </Animated.View>
-
-          {/* Instructions */}
-          <Animated.View
-            entering={FadeInDown.delay(300)
-              .duration(700)
-              .springify()
-              .damping(12)}
-            className="space-y-4"
-          >
-            <Text
-              style={{ fontSize: hp(2.5) }}
-              className="font-bold flex-1 text-neutral-700"
-            >
-              Instrucciones:
-            </Text>
-            {Object.keys(recipe.preparacion).map((key) => (
-              <View key={key} className="space-y-1">
-                <Text
-                  style={{ fontSize: hp(2) }}
-                  className="font-bold text-neutral-700"
-                >
-                  {key}
-                </Text>
-                {recipe.preparacion[key].map((step, i) => (
-                  <Text
-                    key={i}
-                    style={{ fontSize: hp(1.6) }}
-                    className="text-neutral-700"
-                  >
-                    {step.texto}
-                  </Text>
-                ))}
-              </View>
-            ))}
-          </Animated.View>
-
-          {/* Tips */}
-          {recipe.tips && recipe.tips.length > 0 && (
+          {/* Meal description */}
+          <View className="px-4 flex justify-between space-y-4 pt-8">
+            {/* Name and Area */}
             <Animated.View
-              entering={FadeInDown.delay(500)
+              entering={FadeInDown.duration(700).springify().damping(12)}
+              className="space-y-2"
+            >
+              <Text
+                style={{ fontSize: hp(3.6) }}
+                className="font-bold flex-1 text-white"
+              >
+                {recipe.nombre_receta}
+              </Text>
+            </Animated.View>
+
+            {/* Miscellaneous information */}
+            <Animated.View
+              entering={FadeInDown.delay(100)
                 .duration(700)
                 .springify()
                 .damping(12)}
-              className="space-y-4"
+              className="flex-row justify-around"
+            >
+              <View className="flex rounded-full bg-amber-300 p-2">
+                <View
+                  style={{ height: hp(6.5), width: hp(6.5) }}
+                  className="bg-white rounded-full flex items-center justify-center"
+                >
+                  <BoltIcon size={hp(4)} strokeWidth={2.5} color="#525252" />
+                </View>
+                <View className="flex items-center py-2 space-y-1">
+                  <Text
+                    style={{ fontSize: hp(2) }}
+                    className="font-bold text-neutral-700"
+                  >
+                    {getNumberDificultad(recipe.nivel_complejidad)}/4
+                  </Text>
+                  <Text
+                    style={{ fontSize: hp(1.5) }}
+                    className="font-bold text-neutral-700"
+                  >
+                    {recipe.nivel_complejidad}
+                  </Text>
+                </View>
+              </View>
+              <View className="flex rounded-full bg-amber-300 p-2">
+                <View
+                  style={{ height: hp(6.5), width: hp(6.5) }}
+                  className="bg-white rounded-full flex items-center justify-center"
+                >
+                  <UsersIcon size={hp(4)} strokeWidth={2.5} color="#525252" />
+                </View>
+                <View className="flex items-center py-2 space-y-1">
+                  <Text
+                    style={{ fontSize: hp(2) }}
+                    className="font-bold text-neutral-700"
+                  >
+                    04
+                  </Text>
+                  <Text
+                    style={{ fontSize: hp(1.5) }}
+                    className="font-bold text-neutral-700"
+                  >
+                    Porciones
+                  </Text>
+                </View>
+              </View>
+              <View className="flex rounded-full bg-amber-300 p-2">
+                <View
+                  style={{ height: hp(6.5), width: hp(6.5) }}
+                  className="bg-white rounded-full flex items-center justify-center"
+                >
+                  <Image
+                    source={getCategoryImage(recipe.tipo)}
+                    style={styles.image}
+                  />
+                </View>
+                <View className="flex items-center py-2 space-y-1">
+                  <Text
+                    style={{ fontSize: hp(1.3) }}
+                    className="font-bold text-neutral-700"
+                  ></Text>
+                  <Text
+                    style={{ fontSize: hp(1.8) }}
+                    className="font-bold text-neutral-700"
+                  >
+                    {recipe.tipo.slice(0, 8)}
+                  </Text>
+                </View>
+              </View>
+              <View className="flex rounded-full bg-amber-300 p-2">
+                <View
+                  style={{ height: hp(6.5), width: hp(6.5) }}
+                  className="bg-white rounded-full flex items-center justify-center"
+                >
+                  <TvIcon size={hp(5)} strokeWidth={2.5} color="#525252" />
+                </View>
+                <View className="flex items-center py-2 space-y-1">
+                  <Text
+                    style={{ fontSize: hp(1.3) }}
+                    className="font-bold text-neutral-700"
+                  >
+                    Temporada
+                  </Text>
+                  <Text
+                    style={{ fontSize: hp(2) }}
+                    className="font-bold text-neutral-700"
+                  >
+                    {recipe.temporada}
+                  </Text>
+                </View>
+              </View>
+            </Animated.View>
+
+            {/* Ingredients */}
+            <Animated.View
+              entering={FadeInDown.delay(200)
+                .duration(700)
+                .springify()
+                .damping(12)}
+              className="space-y-4 "
             >
               <Text
-                style={{ fontSize: hp(2.5) }}
-                className="font-bold flex-1 text-neutral-700"
+                style={{ fontSize: hp(3.2) }}
+                className="font-bold flex-1 text-white"
               >
-                Tips:
+                Ingredientes:
               </Text>
-              <View style={styles.tipCard}>
-                {recipe.tips.map((tip, index) => (
-                  <View key={index} style={styles.bulletPointContainer}>
-                    <View style={styles.bulletPoint} />
-                    <Text style={styles.tipText}>{tip}</Text>
+              <View className="space-y-2 ml-3 mb-4 ">
+                {Object.keys(recipe.ingredientes).map((key) => (
+                  <View key={key} className="space-y-1">
+                    <Text
+                      style={{ fontSize: hp(2.5), paddingBottom: 4 }}
+                      className="font-bold text-white"
+                    >
+                      {key}
+                    </Text>
+                    {recipe.ingredientes[key].map((ingredient, i) => (
+                      <View key={i} className="flex-row space-x-4 ">
+                        <View
+                          style={{ height: hp(1.5), width: hp(1.5) }}
+                          className="bg-amber-300 rounded-full"
+                        />
+                        <Text
+                          style={{ fontSize: hp(2.2) }}
+                          className="font-medium text-white"
+                        >
+                          {ingredient}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
                 ))}
               </View>
             </Animated.View>
-          )}
 
-          {/* Glosario */}
-
-          {/* Glossary Section */}
-          {recipe.glosario.length > 0 && (
+            {/* Instructions */}
             <Animated.View
-              entering={FadeInDown.delay(400)
+              entering={FadeInDown.delay(300)
                 .duration(700)
                 .springify()
                 .damping(12)}
               className="space-y-4"
             >
               <Text
-                style={{ fontSize: hp(2.5) }}
-                className="font-bold flex-1 text-neutral-700"
+                style={{ fontSize: hp(3.2) }}
+                className="font-bold flex-1 text-white"
               >
-                Glosario:
+                Instrucciones:
               </Text>
-              <View className="space-y-2 ml-3">
+              {Object.keys(recipe.preparacion).map((key) => (
+                <View key={key} className="space-y-1">
+                  <Text
+                    style={{ fontSize: hp(2.5) }}
+                    className="font-bold text-white"
+                  >
+                    {key}
+                  </Text>
+                  {recipe.preparacion[key].map((step, i) => (
+                    <Text
+                      key={i}
+                      style={{ fontSize: hp(2.2) }}
+                      className="text-white"
+                    >
+                      {step.texto}
+                    </Text>
+                  ))}
+                </View>
+              ))}
+            </Animated.View>
+
+            {/* Tips */}
+            {recipe.tips && recipe.tips.length > 0 && (
+              <Animated.View
+                entering={FadeInDown.delay(500)
+                  .duration(700)
+                  .springify()
+                  .damping(12)}
+                className="space-y-4"
+              >
+                <Text
+                  style={{ fontSize: hp(3) }}
+                  className="font-bold flex-1 text-white"
+                >
+                  Tips:
+                </Text>
+                <View style={styles.tipCard}>
+                  {recipe.tips.map((tip, index) => (
+                    <View key={index} style={styles.bulletPointContainerTips}>
+                      <View style={styles.bulletPointTips} />
+                      <Text style={styles.tipText}>{tip}</Text>
+                    </View>
+                  ))}
+                </View>
+              </Animated.View>
+            )}
+
+            {/* Glosario */}
+
+            {/* Glossary Section */}
+            {recipe.glosario.length > 0 && (
+              <Animated.View
+                entering={FadeInDown.delay(400)
+                  .duration(700)
+                  .springify()
+                  .damping(12)}
+                className="space-y-4"
+              >
+                <Text
+                  style={{ fontSize: hp(3.2) }}
+                  className="font-bold flex-1 text-white"
+                >
+                  Glosario:
+                </Text>
+                <View className="space-y-2" style={{ width: "100%" }}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.scrollViewContent}
+                  >
+                    {recipe.glosario.map((term, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={() => handleGlossaryClick(term)}
+                        style={styles.touchableOpacity}
+                      >
+                        <View style={[styles.imageContainer]}>
+                          <Text
+                            className="text-neutral-600"
+                            style={{ fontSize: hp(1.8), color: "#007AFF" }}
+                          >
+                            {term}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </Animated.View>
+            )}
+
+            {/* Recipe Videos */}
+            {recipe.media.length > 1 && (
+              <Animated.View
+                entering={FadeInDown.delay(400)
+                  .duration(700)
+                  .springify()
+                  .damping(12)}
+                className="space-y-4"
+              >
+                <Text
+                  style={{ fontSize: hp(3.1) }}
+                  className="font-bold flex-1 text-white"
+                >
+                  Videos
+                </Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.scrollViewContent}
+                  contentContainerStyle={{ paddingHorizontal: 10 }}
                 >
-                  {recipe.glosario.map((term, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() => handleGlossaryClick(term)}
-                      style={styles.touchableOpacity}
-                    >
-                      <View style={[styles.imageContainer]}>
-                        <Text
-                          className="text-neutral-600"
-                          style={{ fontSize: hp(1.6), color: "#007AFF" }}
-                        >
-                          {term}
-                        </Text>
+                  {recipe.media.slice(1).map((url, index) => {
+                    // const videoId = extractVideoId(url);
+
+                    if (!url) return null;
+
+                    const embedUrl = `https://www.youtube.com/embed/${url}`;
+                    return (
+                      <View key={index} style={styles.videoContainer}>
+                        <WebView
+                          style={styles.webView}
+                          javaScriptEnabled={true}
+                          source={{ uri: embedUrl }}
+                        />
                       </View>
-                    </TouchableOpacity>
-                  ))}
+                    );
+                  })}
                 </ScrollView>
+              </Animated.View>
+            )}
+          </View>
+
+          {/* Modal */}
+          {/* Glossary Modal */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisibleGlosary}
+            onRequestClose={() => setModalVisibleGlosary(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>{selectedGlossaryTerm}</Text>
+                <Text style={styles.modalText}>{selectedDefinition}</Text>
+                <TouchableOpacity
+                  onPress={() => setModalVisibleGlosary(false)}
+                  style={styles.closeButton}
+                >
+                  <Text style={styles.closeButtonText}>Cerrar</Text>
+                </TouchableOpacity>
               </View>
-            </Animated.View>
-          )}
+            </View>
+          </Modal>
+          {/* </SafeAreaView> */}
+        </ScrollView>
 
-          {/* Recipe Videos */}
-          {recipe.media.length > 1 && (
-            <Animated.View
-              entering={FadeInDown.delay(400)
-                .duration(700)
-                .springify()
-                .damping(12)}
-              className="space-y-4"
-            >
-              <Text
-                style={{ fontSize: hp(2.5) }}
-                className="font-bold flex-1 text-neutral-700"
-              >
-                Videos
-              </Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
-              >
-                {recipe.media.slice(1).map((url, index) => {
-                  // const videoId = extractVideoId(url);
+        {/* Floating Action Button (FAB) */}
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => {
+            const firstPreparationKey = Object.keys(recipe.preparacion)[0];
+            const stepsArray = recipe.preparacion[firstPreparationKey];
+            handleOpenSteps();
+          }}
+        >
+          {/* <PlusIcon size={30} color="white" /> */}
 
-                  if (!url) return null;
+          <Image
+            source={require("@/assets/images/cook.png")}
+            style={{ width: 45, height: 45, padding: 10 }}
+          />
+        </TouchableOpacity>
 
-                  const embedUrl = `https://www.youtube.com/embed/${url}`;
-                  return (
-                    <View key={index} style={styles.videoContainer}>
-                      <WebView
-                        style={styles.webView}
-                        javaScriptEnabled={true}
-                        source={{ uri: embedUrl }}
-                      />
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            </Animated.View>
-          )}
-        </View>
-
-        {/* Modal */}
-        {/* Glossary Modal */}
         <Modal
           animationType="slide"
           transparent={true}
-          visible={modalVisibleGlosary}
-          onRequestClose={() => setModalVisibleGlosary(false)}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>{selectedGlossaryTerm}</Text>
-              <Text style={styles.modalText}>{selectedDefinition}</Text>
-              <TouchableOpacity
-                onPress={() => setModalVisibleGlosary(false)}
-                style={styles.closeButton}
-              >
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-        {/* </SafeAreaView> */}
-      </ScrollView>
+              <Text style={styles.modalTitle}>
+                {recipeSteps[currentStep]?.title}
+              </Text>
+              <Text style={styles.modalTextTitle}>
+                Paso {recipeSteps[currentStep]?.stepNumber} de{" "}
+                {recipeSteps[currentStep]?.totalSteps}
+              </Text>
+              <Text style={styles.modalText}>
+                {recipeSteps[currentStep]?.texto ||
+                  "No hay información disponible"}
+              </Text>
 
-      {/* Floating Action Button (FAB) */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => {
-          const firstPreparationKey = Object.keys(recipe.preparacion)[0];
-          const stepsArray = recipe.preparacion[firstPreparationKey];
-          handleOpenSteps();
-        }}
-      >
-        {/* <PlusIcon size={30} color="white" /> */}
-
-        <Image
-          source={require("@/assets/images/cook.png")}
-          style={{ width: 45, height: 45, padding: 10 }}
-        />
-      </TouchableOpacity>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>
-              {recipeSteps[currentStep]?.title}
-            </Text>
-            <Text style={styles.modalTextTitle}>
-              Paso {recipeSteps[currentStep]?.stepNumber} de{" "}
-              {recipeSteps[currentStep]?.totalSteps}
-            </Text>
-            <Text style={styles.modalText}>
-              {recipeSteps[currentStep]?.texto ||
-                "No hay información disponible"}
-            </Text>
-
-            {/* Display verbos_clave as a bullet list */}
-            <View style={styles.verbosClaveContainer}>
+              {/* Display verbos_clave as a bullet list */}
+              {/* <View style={styles.verbosClaveContainer}>
               {recipeSteps[currentStep]?.verbosClave.map((verbo, index) => (
                 <View key={index} style={styles.bulletPointContainer}>
                   <Image
@@ -519,43 +578,44 @@ const RecipeDetail = () => {
                   />
                 </View>
               ))}
-            </View>
+            </View> */}
 
-            <View style={styles.stepNavigation}>
+              <View style={styles.stepNavigation}>
+                <TouchableOpacity
+                  onPress={handlePreviousStep}
+                  disabled={currentStep === 0}
+                  style={[
+                    styles.stepButton,
+                    currentStep === 0 && styles.disabledButton,
+                  ]}
+                >
+                  <Text style={styles.stepButtonText}>Anterior</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleNextStep}
+                  disabled={currentStep === recipeSteps.length - 1}
+                  style={[
+                    styles.stepButton,
+                    currentStep === recipeSteps.length - 1 &&
+                      styles.disabledButton,
+                  ]}
+                >
+                  <Text style={styles.stepButtonText}>Siguiente</Text>
+                </TouchableOpacity>
+              </View>
+
               <TouchableOpacity
-                onPress={handlePreviousStep}
-                disabled={currentStep === 0}
-                style={[
-                  styles.stepButton,
-                  currentStep === 0 && styles.disabledButton,
-                ]}
+                onPress={() => setModalVisible(false)}
+                style={styles.closeButton}
               >
-                <Text style={styles.stepButtonText}>Anterior</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleNextStep}
-                disabled={currentStep === recipeSteps.length - 1}
-                style={[
-                  styles.stepButton,
-                  currentStep === recipeSteps.length - 1 &&
-                    styles.disabledButton,
-                ]}
-              >
-                <Text style={styles.stepButtonText}>Siguiente</Text>
+                <Text style={styles.closeButtonText}>Cerrar</Text>
               </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.closeButton}
-            >
-              <Text style={styles.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
@@ -575,7 +635,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   tipCard: {
-    backgroundColor: "#f1f1f1",
+    backgroundColor: "rgba(96, 32, 32, 0.5)",
     padding: 15,
     borderRadius: 8,
     shadowColor: "#000",
@@ -587,7 +647,9 @@ const styles = StyleSheet.create({
 
   tipText: {
     fontSize: hp(2),
-    color: "#525252",
+    color: "white",
+    // centra el texto  a la izquierda
+    // textAlign: "left",
   },
 
   touchableOpacity: {
@@ -607,8 +669,8 @@ const styles = StyleSheet.create({
     right: 20,
     bottom: 20,
     backgroundColor: "#fbbf24",
-    width: 60,
-    height: 60,
+    width: 65,
+    height: 65,
     borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
@@ -617,6 +679,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+    padding: 4,
   },
   modalOverlay: {
     flex: 1,
@@ -637,9 +700,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   modalText: {
-    fontSize: hp(2),
+    fontSize: hp(2.2),
     marginBottom: 20,
-    textAlign: "center",
+    textAlign: "left",
   },
   stepNavigation: {
     flexDirection: "row",
@@ -689,11 +752,47 @@ const styles = StyleSheet.create({
   bulletPointContainer: {
     display: "flex",
     justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "stretch",
+    alignContent: "space-between",
+    marginBottom: 8,
   },
 
   verbosClaveText: {
     fontSize: hp(2),
     color: "#525252",
+    marginBottom: 8,
+  },
+  bulletPoint: {
+    width: hp(1),
+    height: hp(1),
+    borderRadius: 50,
+    backgroundColor: "#007AFF",
+    // borderColor: "#007AFF",
+    top: 8,
+    marginRight: 4,
+  },
+  bulletPointContainerTips: {
+    display: "flex",
+    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "stretch",
+    alignContent: "space-between",
+    marginBottom: 8,
+  },
+  bulletPointTips: {
+    width: hp(1),
+    height: hp(1),
+    borderRadius: 50,
+    backgroundColor: "#007AFF",
+    // borderColor: "#007AFF",
+    top: 8,
+    marginRight: 4,
+  },
+  image: {
+    width: hp(6),
+    height: hp(6),
+    borderRadius: 50, // Hace que la imagen sea redonda
   },
 });
 

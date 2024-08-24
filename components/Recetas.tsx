@@ -66,12 +66,12 @@ const RecipeCard = ({
             <Text style={{ color: "yellow", fontWeight: "bold" }}>Nivel: </Text>
             {item.nivel_complejidad}
           </Text>
-          <Text style={styles.recipeDificultad}>
+          {/* <Text style={styles.recipeDificultad}>
             <Text style={{ color: "yellow", fontWeight: "bold" }}>
               Temporada:{" "}
             </Text>
             {item.temporada}
-          </Text>
+          </Text> */}
         </View>
       </Pressable>
     </Animated.View>
@@ -87,10 +87,10 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   title: {
-    fontSize: 22,
+    fontSize: 30,
     fontWeight: "600",
     marginBottom: 10,
-    color: "#333",
+    color: "white",
   },
   noRecipesText: {
     textAlign: "center",
@@ -104,6 +104,14 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     // alignItems: "center",
     borderRadius: 16,
+    backgroundColor: "rgba(96, 32, 32, 0.5)",
+    padding: 16,
+    // add shadow
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
   },
   recipeImage: {
     width: "100%",
@@ -116,19 +124,19 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 16,
     fontWeight: "800",
-    color: "#333",
+    color: "white",
   },
   recipeTipo: {
     marginTop: 8,
     fontSize: 14,
     fontWeight: "500",
-    color: "#333",
+    color: "white",
   },
   recipeDificultad: {
     marginTop: 8,
     fontSize: 14,
     fontWeight: "500",
-    color: "#333",
+    color: "white",
   },
   containerText: {
     flexDirection: "row",

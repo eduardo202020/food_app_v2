@@ -17,7 +17,7 @@ interface dificultadesProps {
   tipo: string;
 }
 
-const dificultades: dificultadesProps[] = [
+export const dificultades: dificultadesProps[] = [
   { tipo: "Fácil" },
   { tipo: "Intermedio" },
   { tipo: "Avanzado" },
@@ -51,12 +51,14 @@ export default function Dificultades({
               <View
                 style={[
                   styles.imageContainer,
-                  { backgroundColor: backgroundColor },
+                  {
+                    backgroundColor: backgroundColor,
+                  },
                 ]}
               >
                 <Text
                   className="text-neutral-600"
-                  style={{ fontSize: hp(1.6), color: "#4c4c4c" }}
+                  style={{ fontSize: hp(1.8), color: "#4c4c4c" }}
                 >
                   {dif.tipo}
                 </Text>
@@ -85,6 +87,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     borderRadius: 50, // Hace que la vista sea redonda
     padding: 6,
+    paddingHorizontal: 10,
   },
   image: {
     width: hp(6),

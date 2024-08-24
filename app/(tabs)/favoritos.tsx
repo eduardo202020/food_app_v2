@@ -1,13 +1,15 @@
-import { View, Text } from "react-native";
+import { View, Text, ImageBackground } from "react-native";
 import React from "react";
 
 type Props = {};
 
 const favoritos = (props: Props) => {
   return (
-    <View>
-      <Text>favoritos</Text>
-    </View>
+    <ImageBackground
+      source={require("@/assets/images/madera4.jpg")}
+      style={{ flex: 1 }}
+      width={100}
+    ></ImageBackground>
   );
 };
 

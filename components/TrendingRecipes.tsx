@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    color: "black",
+    color: "white",
     fontSize: 24,
     marginHorizontal: 16,
     marginBottom: 16,

@@ -42,7 +42,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarShowLabel: false, // Oculta los nombres debajo de los íconos
         tabBarStyle: {
-          backgroundColor: "#8B6900", // Cambia este valor al color que desees para la barra de tabs
+          backgroundColor: "#FCD34D", // Cambia este valor al color que desees para la barra de tabs
         },
       }}
     >
