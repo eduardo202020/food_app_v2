@@ -26,9 +26,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Carne",
     media: [
       "https://img.youtube.com/vi/pv31kkZBAys/sddefault.jpg",
-      "https://youtube.com/watch?v=gKjQllo5E0Y",
-      "https://youtube.com/watch?v=pv31kkZBAys",
-      "https://youtube.com/watch?v=cxzg6aywpso",
+      "gKjQllo5E0Y",
+      "pv31kkZBAys",
+      "cxzg6aywpso",
     ],
     ingredientes: {
       "ENSALADA WALDORF": [
@@ -106,9 +106,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Internacional",
     media: [
       "https://img.youtube.com/vi/VsoYb7-AsfA/sddefault.jpg",
-      "https://youtube.com/watch?v=FKsDlos0KCw",
-      "https://youtube.com/watch?v=VsoYb7-AsfA",
-      "https://youtube.com/watch?v=aWwya8oB54I",
+      "FKsDlos0KCw",
+      "VsoYb7-AsfA",
+      "aWwya8oB54I",
     ],
     ingredientes: {
       "PECHUGA DE PAVO": [
@@ -199,9 +199,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Entrada",
     media: [
       "https://img.youtube.com/vi/HXeF1fP3OOM/sddefault.jpg",
-      "https://youtube.com/watch?v=ys4uufhlFao",
-      "https://youtube.com/watch?v=HXeF1fP3OOM",
-      "https://youtube.com/watch?v=kDsP8j7Z2PU",
+      "ys4uufhlFao",
+      "HXeF1fP3OOM",
+      "kDsP8j7Z2PU",
     ],
     ingredientes: {
       TORTILLAS: [
@@ -275,9 +275,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Postre",
     media: [
       "https://img.youtube.com/vi/pv31kkZBAys/sddefault.jpg",
-      "https://youtube.com/watch?v=gKjQllo5E0Y",
-      "https://youtube.com/watch?v=pv31kkZBAys",
-      "https://youtube.com/watch?v=cxzg6aywpso",
+      "gKjQllo5E0Y",
+      "pv31kkZBAys",
+      "cxzg6aywpso",
     ],
     ingredientes: {
       "ENSALADA WALDORF": [
@@ -355,9 +355,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Carne",
     media: [
       "https://img.youtube.com/vi/VsoYb7-AsfA/sddefault.jpg",
-      "https://youtube.com/watch?v=FKsDlos0KCw",
-      "https://youtube.com/watch?v=VsoYb7-AsfA",
-      "https://youtube.com/watch?v=aWwya8oB54I",
+      "FKsDlos0KCw",
+      "VsoYb7-AsfA",
+      "aWwya8oB54I",
     ],
     ingredientes: {
       "PECHUGA DE PAVO": [
@@ -448,9 +448,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Otro",
     media: [
       "https://img.youtube.com/vi/HXeF1fP3OOM/sddefault.jpg",
-      "https://youtube.com/watch?v=ys4uufhlFao",
-      "https://youtube.com/watch?v=HXeF1fP3OOM",
-      "https://youtube.com/watch?v=kDsP8j7Z2PU",
+      "ys4uufhlFao",
+      "HXeF1fP3OOM",
+      "kDsP8j7Z2PU",
     ],
     ingredientes: {
       TORTILLAS: [
@@ -524,9 +524,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Carne",
     media: [
       "https://img.youtube.com/vi/pv31kkZBAys/sddefault.jpg",
-      "https://youtube.com/watch?v=gKjQllo5E0Y",
-      "https://youtube.com/watch?v=pv31kkZBAys",
-      "https://youtube.com/watch?v=cxzg6aywpso",
+      "gKjQllo5E0Y",
+      "pv31kkZBAys",
+      "cxzg6aywpso",
     ],
     ingredientes: {
       "ENSALADA WALDORF": [
@@ -604,9 +604,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Internacional",
     media: [
       "https://img.youtube.com/vi/VsoYb7-AsfA/sddefault.jpg",
-      "https://youtube.com/watch?v=FKsDlos0KCw",
-      "https://youtube.com/watch?v=VsoYb7-AsfA",
-      "https://youtube.com/watch?v=aWwya8oB54I",
+      "FKsDlos0KCw",
+      "VsoYb7-AsfA",
+      "aWwya8oB54I",
     ],
     ingredientes: {
       "PECHUGA DE PAVO": [
@@ -697,9 +697,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Entrada",
     media: [
       "https://img.youtube.com/vi/HXeF1fP3OOM/sddefault.jpg",
-      "https://youtube.com/watch?v=ys4uufhlFao",
-      "https://youtube.com/watch?v=HXeF1fP3OOM",
-      "https://youtube.com/watch?v=kDsP8j7Z2PU",
+      "ys4uufhlFao",
+      "HXeF1fP3OOM",
+      "kDsP8j7Z2PU",
     ],
     ingredientes: {
       TORTILLAS: [
@@ -773,9 +773,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Postre",
     media: [
       "https://img.youtube.com/vi/pv31kkZBAys/sddefault.jpg",
-      "https://youtube.com/watch?v=gKjQllo5E0Y",
-      "https://youtube.com/watch?v=pv31kkZBAys",
-      "https://youtube.com/watch?v=cxzg6aywpso",
+      "gKjQllo5E0Y",
+      "pv31kkZBAys",
+      "cxzg6aywpso",
     ],
     ingredientes: {
       "ENSALADA WALDORF": [
@@ -853,9 +853,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Carne",
     media: [
       "https://img.youtube.com/vi/VsoYb7-AsfA/sddefault.jpg",
-      "https://youtube.com/watch?v=FKsDlos0KCw",
-      "https://youtube.com/watch?v=VsoYb7-AsfA",
-      "https://youtube.com/watch?v=aWwya8oB54I",
+      "FKsDlos0KCw",
+      "VsoYb7-AsfA",
+      "aWwya8oB54I",
     ],
     ingredientes: {
       "PECHUGA DE PAVO": [
@@ -946,9 +946,9 @@ export const foodData: foodDataProps[] = [
     tipo: "Otro",
     media: [
       "https://img.youtube.com/vi/HXeF1fP3OOM/sddefault.jpg",
-      "https://youtube.com/watch?v=ys4uufhlFao",
-      "https://youtube.com/watch?v=HXeF1fP3OOM",
-      "https://youtube.com/watch?v=kDsP8j7Z2PU",
+      "ys4uufhlFao",
+      "HXeF1fP3OOM",
+      "kDsP8j7Z2PU",
     ],
     ingredientes: {
       TORTILLAS: [
