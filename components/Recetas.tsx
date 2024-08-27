@@ -2,8 +2,12 @@ import React from "react";
 import { View, Text, Pressable, Image, StyleSheet } from "react-native";
 import MasonryList from "@react-native-seoul/masonry-list";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { foodDataProps } from "../data/index"; // Importar el tipo foodDataProps
+// import { foodDataProps } from "../data/index"; // Importar el tipo foodDataProps
 import { useRouter } from "expo-router";
+import {
+  recipeProps as foodDataProps,
+  recipeData as foodData,
+} from "@/data/recetario_test";
 
 export default function Recetas({ meals }: { meals: foodDataProps[] }) {
   return (
@@ -29,14 +33,13 @@ export default function Recetas({ meals }: { meals: foodDataProps[] }) {
   );
 }
 
-const RecipeCard = ({
+export const RecipeCard = ({
   item,
   index,
 }: {
   item: foodDataProps;
   index: number;
 }) => {
-  //   let isEven = index % 2 === 0;
   const router = useRouter();
   return (
     <Animated.View
@@ -48,7 +51,6 @@ const RecipeCard = ({
       <Pressable
         style={[styles.recipeCard]}
         onPress={() => {
-          console.log(`Navigating to recipe: ${item.nombre_receta}`);
           router.push(`/(home)/${item.slug}`);
         }}
       >
@@ -65,6 +67,10 @@ const RecipeCard = ({
           <Text style={styles.recipeDificultad}>
             <Text style={{ color: "yellow", fontWeight: "bold" }}>Nivel: </Text>
             {item.nivel_complejidad}
+          </Text>
+          <Text style={styles.recipeDificultad}>
+            <Text style={{ color: "yellow", fontWeight: "bold" }}>Ep: </Text>
+            {item.episodio}
           </Text>
           {/* <Text style={styles.recipeDificultad}>
             <Text style={{ color: "yellow", fontWeight: "bold" }}>

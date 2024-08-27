@@ -8,8 +8,6 @@ export default function Home() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Inicio" }} />
-      <Stack.Screen name="[slug]" options={{ title: "Detalles de Receta" }} />
-      <Stack.Screen name="Temporadas" options={{ title: "Temporadas" }} />
     </Stack>
   );
 }

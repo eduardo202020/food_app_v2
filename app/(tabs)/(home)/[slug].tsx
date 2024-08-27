@@ -12,17 +12,21 @@ import {
   ImageBackground,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { foodData, foodDataProps } from "@/data";
+// import { foodData, foodDataProps } from "@/data";
 import { StatusBar } from "expo-status-bar";
 import {
   ChevronLeftIcon,
-  HeartIcon,
   BoltIcon,
-  FireIcon,
   UsersIcon,
-  Square3Stack3DIcon,
   TvIcon,
 } from "react-native-heroicons/outline";
+
+import { HeartIcon } from "react-native-heroicons/solid";
+
+import {
+  recipeData as foodData,
+  recipeProps as foodDataProps,
+} from "@/data/recetario";
 
 interface RecipeStep {
   title: string;
@@ -31,6 +35,9 @@ interface RecipeStep {
   texto: string;
   verbosClave: string[]; // Make sure this matches the usage in your component
 }
+
+import { useIsRecipeLiked } from "@/hooks/useIsRecipeLiked";
+import { useLikedRecipes } from "@/hooks/useLikedRecipes";
 
 import { categorias, categoriasProps } from "@/data/categorias";
 
@@ -44,10 +51,6 @@ import {
 import { WebView } from "react-native-webview";
 
 import { glosario, glosarioProps } from "@/data/glosario";
-
-import { acciones, accionesProps } from "@/data/action";
-
-import { dificultades } from "@/components/Dificultad";
 
 const getNumberDificultad = (value: string): number => {
   switch (value) {
@@ -72,7 +75,7 @@ const getCategoryImage = (value: string): any => {
 const RecipeDetail = () => {
   const { slug } = useLocalSearchParams();
   const recipe = foodData.find((r) => r.slug === slug);
-  const [isFavourite, setIsFavourite] = useState(false);
+  // const [isFavourite, setIsFavourite] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisibleGlosary, setModalVisibleGlosary] = useState(false);
 
@@ -112,10 +115,10 @@ const RecipeDetail = () => {
       recipe.preparacion[key].forEach((step, index) => {
         stepsArray.push({
           title: key,
-          texto: step.texto,
+          texto: step,
           stepNumber: index + 1,
           totalSteps: recipe.preparacion[key].length,
-          verbosClave: step.verbos_clave,
+          // verbosClave: step.verbos_clave,
         });
       });
     });
@@ -135,6 +138,28 @@ const RecipeDetail = () => {
     }
   };
 
+  // manejo de favoritos
+
+  const { likeRecipe, unlikeRecipe } = useLikedRecipes();
+  const isInitiallyLiked = useIsRecipeLiked(recipe.nombre_receta);
+
+  // Estado para manejar si la receta está en favoritos
+  const [isLiked, setIsLiked] = useState(isInitiallyLiked);
+
+  // Efecto para actualizar `isLiked` cuando cambie la lista de recetas que te gustan
+  useEffect(() => {
+    setIsLiked(isInitiallyLiked);
+  }, [isInitiallyLiked]);
+
+  const handleLiked = () => {
+    if (isLiked) {
+      unlikeRecipe(recipe.nombre_receta);
+    } else {
+      likeRecipe(recipe.nombre_receta);
+    }
+    setIsLiked(!isLiked); // Actualiza el estado local inmediatamente
+  };
+
   return (
     <ImageBackground
       source={require("@/assets/images/madera4.jpg")}
@@ -149,20 +174,8 @@ const RecipeDetail = () => {
         >
           <StatusBar backgroundColor={colorStatusBar} />
 
-          {/* <Stack.Screen
-          options={{
-            headerShown: true,
-            title: recipe.nombre_receta,
-            headerTitleAlign: "center",
-            headerStyle: {
-              backgroundColor: "#B89C00", // Cambia este valor por el color de tu app
-            },
-            headerTintColor: "#FFFFFF", // Color del texto del encabezado
-          }}
-        /> */}
-
-          {/* Recipe image */}
-          <View className="flex-row justify-center">
+          {/* Meal image */}
+          <View className="flex-row justify-center" style={{ flex: 1 }}>
             <Image
               source={{ uri: recipe.media[0] }}
               style={{
@@ -177,7 +190,6 @@ const RecipeDetail = () => {
               }}
             />
           </View>
-
           {/* Back and Favorite buttons */}
           <Animated.View
             entering={FadeIn.delay(200).duration(1000)}
@@ -194,13 +206,13 @@ const RecipeDetail = () => {
               />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setIsFavourite(!isFavourite)}
+              onPress={() => handleLiked()}
               className="p-2 rounded-full mr-5 bg-white"
             >
               <HeartIcon
                 size={hp(3.5)}
                 strokeWidth={4.5}
-                color={isFavourite ? "red" : "gray"}
+                color={isLiked ? "red" : "gray"}
               />
             </TouchableOpacity>
           </Animated.View>
@@ -340,7 +352,7 @@ const RecipeDetail = () => {
                       style={{ fontSize: hp(2.5), paddingBottom: 4 }}
                       className="font-bold text-white"
                     >
-                      {key}
+                      {key == "ingredientes" ? "" : key}
                     </Text>
                     {recipe.ingredientes[key].map((ingredient, i) => (
                       <View key={i} className="flex-row space-x-4 ">
@@ -376,20 +388,30 @@ const RecipeDetail = () => {
                 Instrucciones:
               </Text>
               {Object.keys(recipe.preparacion).map((key) => (
-                <View key={key} className="space-y-1">
+                <View
+                  key={key}
+                  className="space-y-1"
+                  style={{
+                    borderRadius: 8,
+                    backgroundColor: "rgba(10, 10, 10, 0.4)",
+                    paddingHorizontal: 4,
+                    paddingVertical: 8,
+                  }}
+                >
                   <Text
                     style={{ fontSize: hp(2.5) }}
                     className="font-bold text-white"
                   >
-                    {key}
+                    {key == "pasos" ? "" : key}
                   </Text>
                   {recipe.preparacion[key].map((step, i) => (
                     <Text
                       key={i}
-                      style={{ fontSize: hp(2.2) }}
+                      style={{ fontSize: hp(2.2), marginBottom: 4 }}
                       className="text-white"
                     >
-                      {step.texto}
+                      {/* {step.texto} */}
+                      {step}
                     </Text>
                   ))}
                 </View>
@@ -506,7 +528,6 @@ const RecipeDetail = () => {
               </Animated.View>
             )}
           </View>
-
           {/* Modal */}
           {/* Glossary Modal */}
           <Modal
@@ -557,7 +578,9 @@ const RecipeDetail = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>
-                {recipeSteps[currentStep]?.title}
+                {recipeSteps[currentStep]?.title == "pasos"
+                  ? "Instrucciones:"
+                  : recipeSteps[currentStep]?.title}
               </Text>
               <Text style={styles.modalTextTitle}>
                 Paso {recipeSteps[currentStep]?.stepNumber} de{" "}
@@ -774,10 +797,10 @@ const styles = StyleSheet.create({
   },
   bulletPointContainerTips: {
     display: "flex",
-    justifyContent: "center",
+    // justifyContent: "center",
     flexDirection: "row",
-    alignItems: "stretch",
-    alignContent: "space-between",
+    // alignItems: "stretch",
+    // alignContent: "space-between",
     marginBottom: 8,
   },
   bulletPointTips: {

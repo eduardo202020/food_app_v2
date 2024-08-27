@@ -8,75 +8,49 @@ import {
 } from "react-native";
 import React from "react";
 import Carousel from "react-native-snap-carousel";
-import { foodDataProps } from "../data";
+// import { foodDataProps } from "../data";
+import { recipeProps as foodDataProps } from "@/data/recetario_test";
+
+import { tempProps, temporadas } from "@/data/temporadas";
+import { router, useRouter } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 
 interface RecipeCardProps {
-  item: foodDataProps;
+  item: tempProps;
   handleClick: () => void;
 }
 
-// Función para determinar el color del fondo según el tipo de receta
-const getBackgroundColor = (type: string) => {
-  switch (type) {
-    case "Carne":
-      return "#D32F2F";
-    case "Entrada":
-      return "#4CAF50";
-    case "Internacional":
-      return "#7B1FA2";
-    case "Marisco":
-      return "#1976D2";
-    case "Vegetariano":
-      return "#388E3C";
-    case "Pastas y Arroces":
-      return "#FFA000";
-    case "Postre":
-      return "#E91E63";
-    default:
-      return "#B89C00";
-  }
+const RecipeCard = ({ item, handleClick }: RecipeCardProps) => {
+  const router = useRouter();
+
+  return (
+    <Pressable onPress={handleClick} style={{ paddingBottom: 15 }}>
+      <View style={[styles.cardContainer]}>
+        <Image source={item.imagen} style={styles.cardImage} />
+      </View>
+    </Pressable>
+  );
 };
 
-const RecipeCard = ({ item, handleClick }: RecipeCardProps) => (
-  <Pressable onPress={handleClick} style={{ paddingBottom: 15 }}>
-    <View
-      style={[
-        styles.cardContainer,
-        { backgroundColor: getBackgroundColor(item.tipo) },
-      ]}
-    >
-      <Image source={{ uri: item.media[0] }} style={styles.cardImage} />
-
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.nombre_receta}</Text>
-        <Text style={styles.cardSubtitle}>{`Tipo: ${item.tipo}`}</Text>
-        <Text
-          style={styles.cardSubtitle}
-        >{`Nivel: ${item.nivel_complejidad}`}</Text>
-      </View>
-    </View>
-  </Pressable>
-);
-
-const TrendingRecipes = ({ data }: { data: foodDataProps[] }) => {
+const TrendingRecipes = () => {
   const isCarousel = React.useRef(null);
 
-  const handleClick = (item: foodDataProps) => {
-    // navigation.navigate("RecipeDetail", item);
-    // console.log(item);
-
-    alert(item.media[0] + item.tipo);
+  const handleClick = (item: tempProps) => {
+    // alert(item.temporada);
+    router.push({
+      pathname: "/(home)/Temporadas/",
+      params: { temporada: item.temporada },
+    });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Recetas Favoritas:</Text>
+      <Text style={styles.title}>Temporadas:</Text>
 
       <Carousel
-        data={data}
-        renderItem={({ item }: { item: foodDataProps }) => (
+        data={temporadas}
+        renderItem={({ item }: { item: tempProps }) => (
           <RecipeCard item={item} handleClick={() => handleClick(item)} />
         )}
         firstItem={1}
@@ -102,7 +76,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   cardContainer: {
-    backgroundColor: "#B89C00",
     borderRadius: 16,
     overflow: "hidden",
     display: "flex",
@@ -110,16 +83,18 @@ const styles = StyleSheet.create({
     // alignItems: "center",
     // marginRight: 6,
     // marginHorizontal: 15,
-    // borderColor: "black",
-    // borderWidth: 2,
-    elevation: 14,
+    borderColor: "black",
+    borderWidth: 2,
+    elevation: 20,
+    width: width * 0.7,
+    height: height * 0.3,
   },
   cardImage: {
-    width: "110%",
-    height: 140,
+    width: "100%",
+    // height: "100%",
+    // width: width * 0.7,
+    height: height * 0.3,
     resizeMode: "cover",
-    position: "relative",
-    // left: -80,
   },
   cardContent: {
     padding: 20,

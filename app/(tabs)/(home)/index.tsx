@@ -6,16 +6,21 @@ import {
   TouchableOpacity,
   ImageBackground,
   StatusBar,
+  FlatList,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import TrendingRecipes from "@/components/TrendingRecipes";
-import { foodDataProps, foodData } from "../../../data";
+import {
+  recipeProps as foodDataProps,
+  recipeData as foodData,
+} from "@/data/recetario";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Categorias from "@/components/Categorias";
-import Recetas from "@/components/Recetas";
 import Dificultades from "@/components/Dificultad";
+
+import { RecipeCard } from "@/components/Recetas";
 
 const index = () => {
   const router = useRouter();
@@ -77,34 +82,46 @@ const index = () => {
             <Text style={styles.text}>G</Text>ran{" "}
             <Text style={styles.text}>C</Text>hef
           </Text>
-          <TouchableOpacity onPress={() => router.push("/explore")}>
+          <TouchableOpacity onPress={() => router.push("/(tabs)/explore")}>
             <FontAwesome name="search" size={24} color="white" />
           </TouchableOpacity>
         </View>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 10 }}
-        >
-          {/* Recetas filtradas */}
-          {foodData.length > 0 && <TrendingRecipes data={foodData} />}
 
-          {/* Dificultades */}
-          <Dificultades
-            activeDificultad={activeDificultad}
-            handleChangeDificultad={handleDificultad}
-          />
-
-          {/* Categorías */}
-          <Categorias
-            activeCategory={activeCategory}
-            handleChangeCategory={handleChangeCategory}
-          />
-
-          {/* Recipes */}
-          <View>
+        {/* Recipes */}
+        {/* <View>
             <Recetas meals={filteredRecipes} />
-          </View>
-        </ScrollView>
+          </View> */}
+
+        <FlatList
+          data={filteredRecipes}
+          renderItem={({ item, index }) => (
+            <RecipeCard
+              item={item}
+              index={index + item.episodio + item.temporada}
+            />
+          )}
+          keyExtractor={(item) =>
+            item.nombre_receta + item.temporada + item.episodio
+          }
+          ListHeaderComponent={
+            <View>
+              {/* Recetas filtradas */}
+              <TrendingRecipes />
+
+              {/* Dificultades */}
+              <Dificultades
+                activeDificultad={activeDificultad}
+                handleChangeDificultad={handleDificultad}
+              />
+
+              {/* Categorías */}
+              <Categorias
+                activeCategory={activeCategory}
+                handleChangeCategory={handleChangeCategory}
+              />
+            </View>
+          }
+        />
       </SafeAreaView>
     </ImageBackground>
   );
