@@ -29,10 +29,6 @@ export const categorias: categoriasProps[] = [
     imagen: require("../assets/images/tipos/entrada.png"),
   },
   {
-    tipo: "Otro",
-    imagen: require("../assets/images/tipos/otro.png"),
-  },
-  {
     tipo: "Marisco",
     imagen: require("../assets/images/tipos/mariscos.png"),
   },

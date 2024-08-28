@@ -1,15 +1,9 @@
-import {
-  View,
-  Text,
-  ImageBackground,
-  StatusBar,
-  ScrollView,
-} from "react-native";
-import React, { useEffect, useState } from "react";
+import { View, ImageBackground, StatusBar, ScrollView } from "react-native";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useLikedRecipes } from "@/hooks/useLikedRecipes";
-import { recipeData, recipeProps } from "@/data/recetario_test";
+import { recipeData, recipeProps } from "@/data/recetario";
 import Recetas from "@/components/Recetas";
 import { useFocusEffect } from "expo-router";
 import { getLikedRecipes } from "@/utils/storageUtils";
@@ -41,8 +35,6 @@ const favoritos = (props: Props) => {
       fetchLikedRecipes();
     }, [likedRecipes, setFavoriteRecipes])
   );
-
-  console.log(likedRecipes);
 
   return (
     <ImageBackground

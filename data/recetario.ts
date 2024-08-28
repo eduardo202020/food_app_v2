@@ -8734,7 +8734,7 @@ export const recipeData: recipeProps[] = [
   {
     episodio: 33,
     nombre_receta: "POLLO A LA BRASA CON PAPAS FRITAS, ENSALADA Y AJÍ POLLERO",
-    tipo: "Internacional",
+    tipo: "Pollo",
     media: [
       "https://img.youtube.com/vi/YpEXS20-SX4/sddefault.jpg",
       "YpEXS20-SX4",

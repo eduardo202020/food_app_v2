@@ -65,19 +65,6 @@ const SearchScreen = (props: any) => {
           </TouchableOpacity>
         </View>
 
-        {/* {results.length > 0 ? (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 15 }}
-            className="space-y-3"
-          >
-            <Text className="text-white font-semibold ml-1 ">
-              Resultados ({results.length})
-            </Text>
-            <Recetas meals={results} />
-          </ScrollView>
-        ) : */}
-
         {results.length > 0 ? (
           <FlatList
             data={results}

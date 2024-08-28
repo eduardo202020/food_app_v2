@@ -11,9 +11,8 @@ import {
   Modal,
   ImageBackground,
 } from "react-native";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 // import { foodData, foodDataProps } from "@/data";
-import { StatusBar } from "expo-status-bar";
 import {
   ChevronLeftIcon,
   BoltIcon,
@@ -23,10 +22,7 @@ import {
 
 import { HeartIcon } from "react-native-heroicons/solid";
 
-import {
-  recipeData as foodData,
-  recipeProps as foodDataProps,
-} from "@/data/recetario";
+import { recipeData as foodData } from "@/data/recetario";
 
 interface RecipeStep {
   title: string;
@@ -39,7 +35,7 @@ interface RecipeStep {
 import { useIsRecipeLiked } from "@/hooks/useIsRecipeLiked";
 import { useLikedRecipes } from "@/hooks/useLikedRecipes";
 
-import { categorias, categoriasProps } from "@/data/categorias";
+import { categorias } from "@/data/categorias";
 
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import {
@@ -50,7 +46,8 @@ import {
 
 import { WebView } from "react-native-webview";
 
-import { glosario, glosarioProps } from "@/data/glosario";
+import { glosario } from "@/data/glosario";
+import { StatusBar } from "expo-status-bar";
 
 const getNumberDificultad = (value: string): number => {
   switch (value) {

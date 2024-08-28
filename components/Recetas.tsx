@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Pressable, Image, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import MasonryList from "@react-native-seoul/masonry-list";
 import Animated, { FadeInDown } from "react-native-reanimated";
 // import { foodDataProps } from "../data/index"; // Importar el tipo foodDataProps
@@ -55,6 +56,7 @@ export const RecipeCard = ({
         }}
       >
         <Image
+          cachePolicy={"disk"}
           source={{ uri: item.media[0] }} // Asume que media[0] es la imagen principal
           style={styles.recipeImage}
         />
