@@ -10,6 +10,9 @@ import {
   recipeData as foodData,
 } from "@/data/recetario_test";
 
+//@ts-ignore
+import plato from "@/assets/images/action/plato.jpg";
+
 export default function Recetas({ meals }: { meals: foodDataProps[] }) {
   return (
     <View style={styles.container}>
@@ -50,15 +53,18 @@ export const RecipeCard = ({
         .damping(12)}
     >
       <Pressable
-        style={[styles.recipeCard]}
+        style={styles.recipeCard}
         onPress={() => {
           router.push(`/(home)/${item.slug}`);
         }}
       >
         <Image
-          cachePolicy={"disk"}
+          cachePolicy="disk"
           source={{ uri: item.media[0] }} // Asume que media[0] es la imagen principal
           style={styles.recipeImage}
+          contentFit="cover"
+          placeholder={require("@/assets/images/action/plato.jpg")}
+          transition={1000}
         />
         <Text style={styles.recipeTitle}>{item.nombre_receta}</Text>
         <View style={styles.containerText}>
@@ -126,7 +132,6 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 16,
     backgroundColor: "#f2f2f2",
-    resizeMode: "cover",
   },
   recipeTitle: {
     marginTop: 8,

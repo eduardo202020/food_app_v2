@@ -4,10 +4,10 @@ export default function Home() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false, // Mostrar el encabezado
+        headerShown: true, // Mostrar el encabezado
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Inicio" }} />
+      <Stack.Screen name="index" />
     </Stack>
   );
 }

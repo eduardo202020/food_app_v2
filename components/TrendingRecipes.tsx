@@ -4,12 +4,11 @@ import {
   Dimensions,
   Image,
   StyleSheet,
-  Pressable,
+  TouchableOpacity,
 } from "react-native";
 import React from "react";
 import Carousel from "react-native-snap-carousel";
 // import { foodDataProps } from "../data";
-import { recipeProps as foodDataProps } from "@/data/recetario_test";
 
 import { tempProps, temporadas } from "@/data/temporadas";
 import { router, useRouter } from "expo-router";
@@ -25,11 +24,11 @@ const RecipeCard = ({ item, handleClick }: RecipeCardProps) => {
   const router = useRouter();
 
   return (
-    <Pressable onPress={handleClick} style={{ paddingBottom: 15 }}>
+    <TouchableOpacity onPress={handleClick} style={{ paddingBottom: 15 }}>
       <View style={[styles.cardContainer]}>
         <Image source={item.imagen} style={styles.cardImage} />
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 
@@ -79,10 +78,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     display: "flex",
-    // justifyContent: "center",
-    // alignItems: "center",
-    // marginRight: 6,
-    // marginHorizontal: 15,
     borderColor: "black",
     borderWidth: 2,
     elevation: 20,
@@ -91,8 +86,6 @@ const styles = StyleSheet.create({
   },
   cardImage: {
     width: "100%",
-    // height: "100%",
-    // width: width * 0.7,
     height: height * 0.3,
     resizeMode: "cover",
   },
@@ -102,8 +95,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
     paddingTop: 10,
-    // borderWidth: 2, // Grosor del borde
-    // borderColor: "red", // Color del borde
   },
   cardTitle: {
     color: "white",
