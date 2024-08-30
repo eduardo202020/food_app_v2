@@ -1,22 +1,14 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import MasonryList from "@react-native-seoul/masonry-list";
 import Animated, { FadeInDown } from "react-native-reanimated";
-// import { foodDataProps } from "../data/index"; // Importar el tipo foodDataProps
 import { useRouter } from "expo-router";
-import {
-  recipeProps as foodDataProps,
-  recipeData as foodData,
-} from "@/data/recetario_test";
-
-//@ts-ignore
-import plato from "@/assets/images/action/plato.jpg";
+import { recipeProps as foodDataProps } from "@/data/recetario";
 
 export default function Recetas({ meals }: { meals: foodDataProps[] }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Recetas:</Text>
       <View>
         {meals.length === 0 ? (
           <Text style={styles.noRecipesText}>No recipes found.</Text>
@@ -52,7 +44,7 @@ export const RecipeCard = ({
         .springify()
         .damping(12)}
     >
-      <Pressable
+      <TouchableOpacity
         style={styles.recipeCard}
         onPress={() => {
           router.push(`/(home)/${item.slug}`);
@@ -60,7 +52,7 @@ export const RecipeCard = ({
       >
         <Image
           cachePolicy="disk"
-          source={{ uri: item.media[0] }} // Asume que media[0] es la imagen principal
+          source={{ uri: item.media[0] }}
           style={styles.recipeImage}
           contentFit="cover"
           placeholder={require("@/assets/images/action/plato.jpg")}
@@ -80,22 +72,14 @@ export const RecipeCard = ({
             <Text style={{ color: "yellow", fontWeight: "bold" }}>Ep: </Text>
             {item.episodio}
           </Text>
-          {/* <Text style={styles.recipeDificultad}>
-            <Text style={{ color: "yellow", fontWeight: "bold" }}>
-              Temporada:{" "}
-            </Text>
-            {item.temporada}
-          </Text> */}
         </View>
-      </Pressable>
+      </TouchableOpacity>
     </Animated.View>
   );
 };
 
-// Estilos
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
     marginBottom: 20,
     overflow: "hidden",
     paddingTop: 16,
@@ -116,11 +100,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 16,
     paddingBottom: 12,
-    // alignItems: "center",
     borderRadius: 16,
     backgroundColor: "rgba(96, 32, 32, 0.5)",
     padding: 16,
-    // add shadow
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -155,6 +137,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    // marginTop: 8,
   },
 });

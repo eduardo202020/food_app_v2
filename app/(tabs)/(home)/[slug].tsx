@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
@@ -12,7 +11,6 @@ import {
   ImageBackground,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-// import { foodData, foodDataProps } from "@/data";
 import {
   ChevronLeftIcon,
   BoltIcon,
@@ -29,7 +27,7 @@ interface RecipeStep {
   stepNumber: number;
   totalSteps: number;
   texto: string;
-  verbosClave: string[]; // Make sure this matches the usage in your component
+  verbosClave: string[];
 }
 
 import { useIsRecipeLiked } from "@/hooks/useIsRecipeLiked";
@@ -42,12 +40,12 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-// import YouTubeIframe from "react-native-youtube-iframe";
 
 import { WebView } from "react-native-webview";
 
 import { glosario } from "@/data/glosario";
 import { StatusBar } from "expo-status-bar";
+import { Image } from "expo-image";
 
 const getNumberDificultad = (value: string): number => {
   switch (value) {
@@ -60,19 +58,18 @@ const getNumberDificultad = (value: string): number => {
     case "Desafiante":
       return 4;
     default:
-      return 0; // Or throw an error if you prefer
+      return 0;
   }
 };
 
 const getCategoryImage = (value: string): any => {
   const category = categorias.find((cat) => cat.tipo === value);
-  return category ? category.imagen : categorias[6].imagen; // Return the image if found, otherwise return null
+  return category ? category.imagen : categorias[6].imagen;
 };
 
 const RecipeDetail = () => {
   const { slug } = useLocalSearchParams();
   const recipe = foodData.find((r) => r.slug === slug);
-  // const [isFavourite, setIsFavourite] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisibleGlosary, setModalVisibleGlosary] = useState(false);
 
@@ -115,7 +112,6 @@ const RecipeDetail = () => {
           texto: step,
           stepNumber: index + 1,
           totalSteps: recipe.preparacion[key].length,
-          // verbosClave: step.verbos_clave,
         });
       });
     });
@@ -136,7 +132,6 @@ const RecipeDetail = () => {
   };
 
   // manejo de favoritos
-
   const { likeRecipe, unlikeRecipe } = useLikedRecipes();
   const isInitiallyLiked = useIsRecipeLiked(recipe.nombre_receta);
 
@@ -185,6 +180,10 @@ const RecipeDetail = () => {
                 borderBottomRightRadius: 40,
                 resizeMode: "cover",
               }}
+              cachePolicy={"disk"}
+              contentFit="cover"
+              placeholder={require("@/assets/images/action/plato.jpg")}
+              transition={1000}
             />
           </View>
           {/* Back and Favorite buttons */}
@@ -546,7 +545,6 @@ const RecipeDetail = () => {
               </View>
             </View>
           </Modal>
-          {/* </SafeAreaView> */}
         </ScrollView>
 
         {/* Floating Action Button (FAB) */}
@@ -558,8 +556,6 @@ const RecipeDetail = () => {
             handleOpenSteps();
           }}
         >
-          {/* <PlusIcon size={30} color="white" /> */}
-
           <Image
             source={require("@/assets/images/cook.png")}
             style={{ width: 45, height: 45, padding: 10 }}
@@ -587,19 +583,6 @@ const RecipeDetail = () => {
                 {recipeSteps[currentStep]?.texto ||
                   "No hay información disponible"}
               </Text>
-
-              {/* Display verbos_clave as a bullet list */}
-              {/* <View style={styles.verbosClaveContainer}>
-              {recipeSteps[currentStep]?.verbosClave.map((verbo, index) => (
-                <View key={index} style={styles.bulletPointContainer}>
-                  <Image
-                    source={acciones.find((a) => a.tipo === verbo)?.imagen}
-                    style={{ width: hp(12), height: hp(12) }}
-                  />
-                </View>
-              ))}
-            </View> */}
-
               <View style={styles.stepNavigation}>
                 <TouchableOpacity
                   onPress={handlePreviousStep}
@@ -668,8 +651,6 @@ const styles = StyleSheet.create({
   tipText: {
     fontSize: hp(2),
     color: "white",
-    // centra el texto  a la izquierda
-    // textAlign: "left",
   },
 
   touchableOpacity: {
@@ -678,7 +659,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   imageContainer: {
-    borderRadius: 50, // Hace que la vista sea redonda
+    borderRadius: 50,
     padding: 6,
     backgroundColor: "#E0E0E0",
     borderColor: "#007AFF",
@@ -765,9 +746,7 @@ const styles = StyleSheet.create({
     display: "flex",
     width: "100%",
     flexDirection: "row",
-    // backgroundColor: "gray",
     justifyContent: "space-around",
-    // width: "100%",
   },
   bulletPointContainer: {
     display: "flex",
@@ -788,16 +767,12 @@ const styles = StyleSheet.create({
     height: hp(1),
     borderRadius: 50,
     backgroundColor: "#007AFF",
-    // borderColor: "#007AFF",
     top: 8,
     marginRight: 4,
   },
   bulletPointContainerTips: {
     display: "flex",
-    // justifyContent: "center",
     flexDirection: "row",
-    // alignItems: "stretch",
-    // alignContent: "space-between",
     marginBottom: 8,
   },
   bulletPointTips: {
@@ -805,14 +780,13 @@ const styles = StyleSheet.create({
     height: hp(1),
     borderRadius: 50,
     backgroundColor: "#007AFF",
-    // borderColor: "#007AFF",
     top: 8,
     marginRight: 4,
   },
   image: {
     width: hp(6),
     height: hp(6),
-    borderRadius: 50, // Hace que la imagen sea redonda
+    borderRadius: 50,
   },
 });
 

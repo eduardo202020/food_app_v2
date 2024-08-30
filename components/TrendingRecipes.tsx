@@ -6,25 +6,21 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React, { useCallback } from "react";
 import Carousel from "react-native-snap-carousel";
-// import { foodDataProps } from "../data";
-
 import { tempProps, temporadas } from "@/data/temporadas";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 
 interface RecipeCardProps {
   item: tempProps;
-  handleClick: () => void;
+  onPress: () => void;
 }
 
-const RecipeCard = ({ item, handleClick }: RecipeCardProps) => {
-  const router = useRouter();
-
+const RecipeCard = ({ item, onPress }: RecipeCardProps) => {
   return (
-    <TouchableOpacity onPress={handleClick} style={{ paddingBottom: 15 }}>
+    <TouchableOpacity onPress={onPress} style={{ paddingBottom: 15 }}>
       <View style={[styles.cardContainer]}>
         <Image source={item.imagen} style={styles.cardImage} />
       </View>
@@ -33,15 +29,19 @@ const RecipeCard = ({ item, handleClick }: RecipeCardProps) => {
 };
 
 const TrendingRecipes = () => {
+  const router = useRouter();
   const isCarousel = React.useRef(null);
 
-  const handleClick = (item: tempProps) => {
-    // alert(item.temporada);
-    router.push({
-      pathname: "/(home)/Temporadas/",
-      params: { temporada: item.temporada },
-    });
-  };
+  // Memorizar la función de click
+  const handleClick = useCallback(
+    (temporada: number) => {
+      router.push({
+        pathname: "/(home)/Temporadas/",
+        params: { temporada },
+      });
+    },
+    [router]
+  );
 
   return (
     <View style={styles.container}>
@@ -50,7 +50,7 @@ const TrendingRecipes = () => {
       <Carousel
         data={temporadas}
         renderItem={({ item }: { item: tempProps }) => (
-          <RecipeCard item={item} handleClick={() => handleClick(item)} />
+          <RecipeCard item={item} onPress={() => handleClick(item.temporada)} />
         )}
         firstItem={1}
         inactiveSlideScale={0.8}
@@ -88,22 +88,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: height * 0.3,
     resizeMode: "cover",
-  },
-  cardContent: {
-    padding: 20,
-    paddingBottom: 10,
-    overflow: "hidden",
-    position: "relative",
-    paddingTop: 10,
-  },
-  cardTitle: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  cardSubtitle: {
-    color: "white",
-    fontSize: 14,
   },
   slideStyle: {
     display: "flex",

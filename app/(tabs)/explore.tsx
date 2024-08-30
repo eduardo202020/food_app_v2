@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  Dimensions,
   TextInput,
   TouchableOpacity,
   Image,
@@ -23,7 +22,7 @@ import {
 import { debounce } from "lodash";
 import { useRouter } from "expo-router";
 
-const SearchScreen = (props: any) => {
+const SearchScreen = () => {
   const router = useRouter();
 
   const [results, setResults] = useState<foodDataProps[]>([]);

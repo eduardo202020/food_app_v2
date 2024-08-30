@@ -6,30 +6,21 @@ import {
   Text,
   View,
   Image,
-  TouchableOpacity,
 } from "react-native";
 
-import { recipeData, recipeProps } from "@/data/recetario";
-import { tempProps, temporadas } from "@/data/temporadas";
+import { recipeData } from "@/data/recetario";
+import { temporadas } from "@/data/temporadas";
 
 import React, { useLayoutEffect } from "react";
-import {
-  Stack,
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-} from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import Recetas from "@/components/Recetas";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 
-type Props = {};
-
-const index = (props: Props) => {
+const index = () => {
   const { temporada } = useLocalSearchParams();
 
   const numTemporada = parseInt(temporada as string, 10); // Parse the temporada correctly
@@ -60,26 +51,12 @@ const index = (props: Props) => {
       style={{ flex: 1 }}
       width={100}
     >
-      {/* <Stack screenOptions={{}}>
-        <Stack.Screen name={`Temporada ${filteredTemporada.temporada}`} />
-      </Stack> */}
       <StatusBar barStyle={"dark-content"} />
-      {/* <SafeAreaView> */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 10 }}
+        contentContainerStyle={{ paddingBottom: 10, width: wp(100) }}
       >
         <View style={styles.seasonInfo}>
-          {/* <TouchableOpacity
-              onPress={() => router.back()}
-              className="p-2 w-14 rounded-full ml-5 bg-white-500 absolute top-12 left-12"
-            >
-              <ChevronLeftIcon
-                size={hp(3.5)}
-                strokeWidth={4.5}
-                color="#fbbf24"
-              />
-            </TouchableOpacity> */}
           <Image
             source={filteredTemporada.imagen}
             style={styles.seasonImage}
@@ -122,7 +99,6 @@ const index = (props: Props) => {
           <Recetas meals={filteredRecipes} />
         </View>
       </ScrollView>
-      {/* </SafeAreaView> */}
     </ImageBackground>
   );
 };
@@ -135,6 +111,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 12,
     marginBottom: 16,
+    width: "100%",
   },
   seasonImage: {
     width: "100%",
