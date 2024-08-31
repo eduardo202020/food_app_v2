@@ -190,7 +190,7 @@ const index = () => {
             <Text style={styles.text}>G</Text>ran{" "}
             <Text style={styles.text}>C</Text>hef
           </Text>
-          <TouchableOpacity onPress={clearAsyncStorage}>
+          <TouchableOpacity>
             <FontAwesome name="search" size={24} color="white" />
           </TouchableOpacity>
         </View>
