@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
@@ -11,43 +10,42 @@ import {
   Modal,
   ImageBackground,
 } from "react-native";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { foodData, foodDataProps } from "@/data";
-import { StatusBar } from "expo-status-bar";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ChevronLeftIcon,
-  HeartIcon,
   BoltIcon,
-  FireIcon,
   UsersIcon,
-  Square3Stack3DIcon,
   TvIcon,
 } from "react-native-heroicons/outline";
+
+import { HeartIcon } from "react-native-heroicons/solid";
+
+import { recipeData as foodData } from "@/data/recetario";
 
 interface RecipeStep {
   title: string;
   stepNumber: number;
   totalSteps: number;
   texto: string;
-  verbosClave: string[]; // Make sure this matches the usage in your component
+  verbosClave: string[];
 }
 
-import { categorias, categoriasProps } from "@/data/categorias";
+import { useIsRecipeLiked } from "@/hooks/useIsRecipeLiked";
+import { useLikedRecipes } from "@/hooks/useLikedRecipes";
+
+import { categorias } from "@/data/categorias";
 
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-// import YouTubeIframe from "react-native-youtube-iframe";
 
 import { WebView } from "react-native-webview";
 
-import { glosario, glosarioProps } from "@/data/glosario";
-
-import { acciones, accionesProps } from "@/data/action";
-
-import { dificultades } from "@/components/Dificultad";
+import { glosario } from "@/data/glosario";
+import { StatusBar } from "expo-status-bar";
+import { Image } from "expo-image";
 
 const getNumberDificultad = (value: string): number => {
   switch (value) {
@@ -60,19 +58,18 @@ const getNumberDificultad = (value: string): number => {
     case "Desafiante":
       return 4;
     default:
-      return 0; // Or throw an error if you prefer
+      return 0;
   }
 };
 
 const getCategoryImage = (value: string): any => {
   const category = categorias.find((cat) => cat.tipo === value);
-  return category ? category.imagen : categorias[6].imagen; // Return the image if found, otherwise return null
+  return category ? category.imagen : categorias[6].imagen;
 };
 
 const RecipeDetail = () => {
   const { slug } = useLocalSearchParams();
   const recipe = foodData.find((r) => r.slug === slug);
-  const [isFavourite, setIsFavourite] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisibleGlosary, setModalVisibleGlosary] = useState(false);
 
@@ -112,10 +109,9 @@ const RecipeDetail = () => {
       recipe.preparacion[key].forEach((step, index) => {
         stepsArray.push({
           title: key,
-          texto: step.texto,
+          texto: step,
           stepNumber: index + 1,
           totalSteps: recipe.preparacion[key].length,
-          verbosClave: step.verbos_clave,
         });
       });
     });
@@ -135,6 +131,27 @@ const RecipeDetail = () => {
     }
   };
 
+  // manejo de favoritos
+  const { likeRecipe, unlikeRecipe } = useLikedRecipes();
+  const isInitiallyLiked = useIsRecipeLiked(recipe.nombre_receta);
+
+  // Estado para manejar si la receta está en favoritos
+  const [isLiked, setIsLiked] = useState(isInitiallyLiked);
+
+  // Efecto para actualizar `isLiked` cuando cambie la lista de recetas que te gustan
+  useEffect(() => {
+    setIsLiked(isInitiallyLiked);
+  }, [isInitiallyLiked]);
+
+  const handleLiked = () => {
+    if (isLiked) {
+      unlikeRecipe(recipe.nombre_receta);
+    } else {
+      likeRecipe(recipe.nombre_receta);
+    }
+    setIsLiked(!isLiked); // Actualiza el estado local inmediatamente
+  };
+
   return (
     <ImageBackground
       source={require("@/assets/images/madera4.jpg")}
@@ -149,20 +166,8 @@ const RecipeDetail = () => {
         >
           <StatusBar backgroundColor={colorStatusBar} />
 
-          {/* <Stack.Screen
-          options={{
-            headerShown: true,
-            title: recipe.nombre_receta,
-            headerTitleAlign: "center",
-            headerStyle: {
-              backgroundColor: "#B89C00", // Cambia este valor por el color de tu app
-            },
-            headerTintColor: "#FFFFFF", // Color del texto del encabezado
-          }}
-        /> */}
-
-          {/* Recipe image */}
-          <View className="flex-row justify-center">
+          {/* Meal image */}
+          <View className="flex-row justify-center" style={{ flex: 1 }}>
             <Image
               source={{ uri: recipe.media[0] }}
               style={{
@@ -175,9 +180,12 @@ const RecipeDetail = () => {
                 borderBottomRightRadius: 40,
                 resizeMode: "cover",
               }}
+              cachePolicy={"disk"}
+              contentFit="cover"
+              placeholder={require("@/assets/images/action/plato.jpg")}
+              transition={1000}
             />
           </View>
-
           {/* Back and Favorite buttons */}
           <Animated.View
             entering={FadeIn.delay(200).duration(1000)}
@@ -194,13 +202,13 @@ const RecipeDetail = () => {
               />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setIsFavourite(!isFavourite)}
+              onPress={() => handleLiked()}
               className="p-2 rounded-full mr-5 bg-white"
             >
               <HeartIcon
                 size={hp(3.5)}
                 strokeWidth={4.5}
-                color={isFavourite ? "red" : "gray"}
+                color={isLiked ? "red" : "gray"}
               />
             </TouchableOpacity>
           </Animated.View>
@@ -340,7 +348,7 @@ const RecipeDetail = () => {
                       style={{ fontSize: hp(2.5), paddingBottom: 4 }}
                       className="font-bold text-white"
                     >
-                      {key}
+                      {key == "ingredientes" ? "" : key}
                     </Text>
                     {recipe.ingredientes[key].map((ingredient, i) => (
                       <View key={i} className="flex-row space-x-4 ">
@@ -376,20 +384,30 @@ const RecipeDetail = () => {
                 Instrucciones:
               </Text>
               {Object.keys(recipe.preparacion).map((key) => (
-                <View key={key} className="space-y-1">
+                <View
+                  key={key}
+                  className="space-y-1"
+                  style={{
+                    borderRadius: 8,
+                    backgroundColor: "rgba(10, 10, 10, 0.4)",
+                    paddingHorizontal: 4,
+                    paddingVertical: 8,
+                  }}
+                >
                   <Text
                     style={{ fontSize: hp(2.5) }}
                     className="font-bold text-white"
                   >
-                    {key}
+                    {key == "pasos" ? "" : key}
                   </Text>
                   {recipe.preparacion[key].map((step, i) => (
                     <Text
                       key={i}
-                      style={{ fontSize: hp(2.2) }}
+                      style={{ fontSize: hp(2.2), marginBottom: 4 }}
                       className="text-white"
                     >
-                      {step.texto}
+                      {/* {step.texto} */}
+                      {step}
                     </Text>
                   ))}
                 </View>
@@ -506,7 +524,6 @@ const RecipeDetail = () => {
               </Animated.View>
             )}
           </View>
-
           {/* Modal */}
           {/* Glossary Modal */}
           <Modal
@@ -528,7 +545,6 @@ const RecipeDetail = () => {
               </View>
             </View>
           </Modal>
-          {/* </SafeAreaView> */}
         </ScrollView>
 
         {/* Floating Action Button (FAB) */}
@@ -540,8 +556,6 @@ const RecipeDetail = () => {
             handleOpenSteps();
           }}
         >
-          {/* <PlusIcon size={30} color="white" /> */}
-
           <Image
             source={require("@/assets/images/cook.png")}
             style={{ width: 45, height: 45, padding: 10 }}
@@ -557,7 +571,9 @@ const RecipeDetail = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>
-                {recipeSteps[currentStep]?.title}
+                {recipeSteps[currentStep]?.title == "pasos"
+                  ? "Instrucciones:"
+                  : recipeSteps[currentStep]?.title}
               </Text>
               <Text style={styles.modalTextTitle}>
                 Paso {recipeSteps[currentStep]?.stepNumber} de{" "}
@@ -567,19 +583,6 @@ const RecipeDetail = () => {
                 {recipeSteps[currentStep]?.texto ||
                   "No hay información disponible"}
               </Text>
-
-              {/* Display verbos_clave as a bullet list */}
-              {/* <View style={styles.verbosClaveContainer}>
-              {recipeSteps[currentStep]?.verbosClave.map((verbo, index) => (
-                <View key={index} style={styles.bulletPointContainer}>
-                  <Image
-                    source={acciones.find((a) => a.tipo === verbo)?.imagen}
-                    style={{ width: hp(12), height: hp(12) }}
-                  />
-                </View>
-              ))}
-            </View> */}
-
               <View style={styles.stepNavigation}>
                 <TouchableOpacity
                   onPress={handlePreviousStep}
@@ -648,8 +651,6 @@ const styles = StyleSheet.create({
   tipText: {
     fontSize: hp(2),
     color: "white",
-    // centra el texto  a la izquierda
-    // textAlign: "left",
   },
 
   touchableOpacity: {
@@ -658,7 +659,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   imageContainer: {
-    borderRadius: 50, // Hace que la vista sea redonda
+    borderRadius: 50,
     padding: 6,
     backgroundColor: "#E0E0E0",
     borderColor: "#007AFF",
@@ -745,9 +746,7 @@ const styles = StyleSheet.create({
     display: "flex",
     width: "100%",
     flexDirection: "row",
-    // backgroundColor: "gray",
     justifyContent: "space-around",
-    // width: "100%",
   },
   bulletPointContainer: {
     display: "flex",
@@ -768,16 +767,12 @@ const styles = StyleSheet.create({
     height: hp(1),
     borderRadius: 50,
     backgroundColor: "#007AFF",
-    // borderColor: "#007AFF",
     top: 8,
     marginRight: 4,
   },
   bulletPointContainerTips: {
     display: "flex",
-    justifyContent: "center",
     flexDirection: "row",
-    alignItems: "stretch",
-    alignContent: "space-between",
     marginBottom: 8,
   },
   bulletPointTips: {
@@ -785,14 +780,13 @@ const styles = StyleSheet.create({
     height: hp(1),
     borderRadius: 50,
     backgroundColor: "#007AFF",
-    // borderColor: "#007AFF",
     top: 8,
     marginRight: 4,
   },
   image: {
     width: hp(6),
     height: hp(6),
-    borderRadius: 50, // Hace que la imagen sea redonda
+    borderRadius: 50,
   },
 });
 

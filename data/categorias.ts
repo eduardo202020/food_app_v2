@@ -13,7 +13,7 @@ export const categorias: categoriasProps[] = [
     imagen: require("../assets/images/tipos/vegetariano.png"),
   },
   {
-    tipo: "Postres",
+    tipo: "Postre",
     imagen: require("../assets/images/tipos/postres.png"),
   },
   {
@@ -29,11 +29,7 @@ export const categorias: categoriasProps[] = [
     imagen: require("../assets/images/tipos/entrada.png"),
   },
   {
-    tipo: "Otro",
-    imagen: require("../assets/images/tipos/otro.png"),
-  },
-  {
-    tipo: "Mariscos",
+    tipo: "Marisco",
     imagen: require("../assets/images/tipos/mariscos.png"),
   },
   {

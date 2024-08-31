@@ -1,41 +1,31 @@
 import {
   View,
   Text,
-  Dimensions,
   TextInput,
   TouchableOpacity,
-  ScrollView,
   Image,
-  TouchableWithoutFeedback,
   ImageBackground,
   StyleSheet,
+  FlatList,
 } from "react-native";
 import React, { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { XMarkIcon } from "react-native-heroicons/outline";
 
-import Recetas from "@/components/Recetas";
+import { RecipeCard } from "@/components/Recetas";
 
-import { foodData, foodDataProps } from "@/data"; // Asegúrate de importar el arreglo de recetas
-
-// import Loading from "../components/Loading";
-
-// import { debounce } from "lodash";
+import {
+  recipeProps as foodDataProps,
+  recipeData as foodData,
+} from "@/data/recetario";
 
 import { debounce } from "lodash";
-// import { fallbackMoviePoster, image185, searchMovies } from "../api/moviedb";
 import { useRouter } from "expo-router";
-import { FontAwesome6 } from "@expo/vector-icons";
 
-const { width, height } = Dimensions.get("window");
-
-const SearchScreen = (props: any) => {
+const SearchScreen = () => {
   const router = useRouter();
 
   const [results, setResults] = useState<foodDataProps[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const [filteredRecipes, setFilteredRecipes] = useState<foodDataProps[]>([]);
 
   const handleSearch = (value: string) => {
     if (value && value.length > 2) {
@@ -48,7 +38,7 @@ const SearchScreen = (props: any) => {
     }
   };
 
-  const handleTextDebounce = useCallback(debounce(handleSearch, 400), []);
+  const handleTextDebounce = useCallback(debounce(handleSearch, 10), []);
 
   return (
     <ImageBackground
@@ -74,67 +64,24 @@ const SearchScreen = (props: any) => {
           </TouchableOpacity>
         </View>
 
-        {/* results */}
-
-        {/* {loading ? (
-        // <Loading />
-        <View>
-          <Text> Cargando </Text>
-        </View>
-      ) : results.length > 0 ? (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 15 }}
-          className="space-y-3"
-        >
-          <Text className="text-white font-semibold ml-1 ">
-            Results ({results.length})
-          </Text>
-          <View className="flex-row justify-between flex-wrap">
-            {results.map((item, index) => (
-              <TouchableWithoutFeedback
-                key={index}
-                onPress={() => navigation.push("Movie", item)}
-              >
-                <View className="space-y-2 mb-4">
-                  <Image
-                    className="rounded-3xl"
-                    // source={require("../assets/images/moviePoster2.png")}
-                    source={{
-                      uri: image185(item?.poster_path) || fallbackMoviePoster,
-                    }}
-                    style={{ width: width * 0.44, height: height * 0.3 }}
-                  />
-                  <Text className="text-neutral-300 ml-1 ">
-                    {item?.title.length > 22
-                      ? item?.title.slice(0, 22) + "..."
-                      : item?.title}
-                  </Text>
-                </View>
-              </TouchableWithoutFeedback>
-            ))}
-          </View>
-        </ScrollView>
-      ) : (
-        <View className="flex-row justify-center ">
-          <Image
-            source={require("../assets/images/movieTime.png")}
-            className="h-96 w-96"
-          />
-        </View>
-      )} */}
-
         {results.length > 0 ? (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 15 }}
-            className="space-y-3"
-          >
-            <Text className="text-white font-semibold ml-1 ">
-              Resultados ({results.length})
-            </Text>
-            <Recetas meals={results} />
-          </ScrollView>
+          <FlatList
+            data={results}
+            renderItem={({ item, index }) => (
+              <RecipeCard
+                item={item}
+                index={index + item.episodio * item.temporada}
+              />
+            )}
+            keyExtractor={(item) =>
+              item.nombre_receta + item.temporada + item.episodio
+            }
+            ListHeaderComponent={
+              <Text className="text-white font-semibold ml-1 ">
+                Resultados ({results.length}):
+              </Text>
+            }
+          ></FlatList>
         ) : (
           <View className="flex-row justify-center ">
             <Image
