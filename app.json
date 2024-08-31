@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "food_app_v2",
-    "slug": "food_app_v2",
+    "name": "cheff_app",
+    "slug": "cheff_app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "cheff",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/logo.png",
