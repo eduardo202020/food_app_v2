@@ -5,6 +5,7 @@ import MasonryList from "@react-native-seoul/masonry-list";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import { recipeProps as foodDataProps } from "@/data/recetario";
+import { RecipeCard } from "./RecipeCard";
 
 export default function Recetas({ meals }: { meals: foodDataProps[] }) {
   return (
@@ -29,54 +30,54 @@ export default function Recetas({ meals }: { meals: foodDataProps[] }) {
   );
 }
 
-export const RecipeCard = ({
-  item,
-  index,
-}: {
-  item: foodDataProps;
-  index: number;
-}) => {
-  const router = useRouter();
-  return (
-    <Animated.View
-      entering={FadeInDown.delay(index * 100)
-        .duration(600)
-        .springify()
-        .damping(12)}
-    >
-      <TouchableOpacity
-        style={styles.recipeCard}
-        onPress={() => {
-          router.push(`/(home)/${item.slug}`);
-        }}
-      >
-        <Image
-          cachePolicy="disk"
-          source={{ uri: item.media[0] }}
-          style={styles.recipeImage}
-          contentFit="cover"
-          placeholder={require("@/assets/images/action/plato.jpg")}
-          transition={1000}
-        />
-        <Text style={styles.recipeTitle}>{item.nombre_receta}</Text>
-        <View style={styles.containerText}>
-          <Text style={styles.recipeTipo}>
-            <Text style={{ color: "yellow", fontWeight: "bold" }}>Tipo: </Text>
-            {item.tipo}
-          </Text>
-          <Text style={styles.recipeDificultad}>
-            <Text style={{ color: "yellow", fontWeight: "bold" }}>Nivel: </Text>
-            {item.nivel_complejidad}
-          </Text>
-          <Text style={styles.recipeDificultad}>
-            <Text style={{ color: "yellow", fontWeight: "bold" }}>Ep: </Text>
-            {item.episodio}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
+// export const RecipeCard = ({
+//   item,
+//   index,
+// }: {
+//   item: foodDataProps;
+//   index: number;
+// }) => {
+//   const router = useRouter();
+//   return (
+//     <Animated.View
+//       entering={FadeInDown.delay(index * 100)
+//         .duration(600)
+//         .springify()
+//         .damping(12)}
+//     >
+//       <TouchableOpacity
+//         style={styles.recipeCard}
+//         onPress={() => {
+//           router.push(`/(home)/${item.slug}`);
+//         }}
+//       >
+//         <Image
+//           cachePolicy="disk"
+//           source={{ uri: item.media[0] }}
+//           style={styles.recipeImage}
+//           contentFit="cover"
+//           placeholder={require("@/assets/images/action/plato.jpg")}
+//           transition={1000}
+//         />
+//         <Text style={styles.recipeTitle}>{item.nombre_receta}</Text>
+//         <View style={styles.containerText}>
+//           <Text style={styles.recipeTipo}>
+//             <Text style={{ color: "yellow", fontWeight: "bold" }}>Tipo: </Text>
+//             {item.tipo}
+//           </Text>
+//           <Text style={styles.recipeDificultad}>
+//             <Text style={{ color: "yellow", fontWeight: "bold" }}>Nivel: </Text>
+//             {item.nivel_complejidad}
+//           </Text>
+//           <Text style={styles.recipeDificultad}>
+//             <Text style={{ color: "yellow", fontWeight: "bold" }}>Ep: </Text>
+//             {item.episodio}
+//           </Text>
+//         </View>
+//       </TouchableOpacity>
+//     </Animated.View>
+//   );
+// };
 
 const styles = StyleSheet.create({
   container: {

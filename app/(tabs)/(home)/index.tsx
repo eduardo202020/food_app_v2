@@ -23,7 +23,7 @@ import { useRouter } from "expo-router";
 import Categorias from "@/components/Categorias";
 import Dificultades from "@/components/Dificultad";
 
-import { RecipeCard } from "@/components/Recetas";
+import { RecipeCard } from "@/components/RecipeCard";
 import { claves } from "@/data/encript";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
