@@ -1,18 +1,18 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Image } from "expo-image";
-import MasonryList from "@react-native-seoul/masonry-list";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { useRouter } from "expo-router";
-import { recipeProps as foodDataProps } from "@/data/recetario";
-import { RecipeCard } from "./RecipeCard";
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
+import MasonryList from '@react-native-seoul/masonry-list';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
+import { recipeProps as foodDataProps } from '@/data/recetario';
+import { RecipeCard } from './RecipeCard';
 
 export default function Recetas({ meals }: { meals: foodDataProps[] }) {
   return (
     <View style={styles.container}>
       <View>
         {meals.length === 0 ? (
-          <Text style={styles.noRecipesText}>No recipes found.</Text>
+          <Text style={styles.noRecipesText}>Ninguna Receta Guardada.</Text>
         ) : (
           <MasonryList
             data={meals}
@@ -82,19 +82,19 @@ export default function Recetas({ meals }: { meals: foodDataProps[] }) {
 const styles = StyleSheet.create({
   container: {
     marginBottom: 20,
-    overflow: "hidden",
+    overflow: 'hidden',
     paddingTop: 16,
   },
   title: {
     fontSize: 30,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 10,
-    color: "white",
+    color: 'white',
   },
   noRecipesText: {
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: 20,
-    color: "#999",
+    color: 'white',
     fontSize: 18,
   },
   recipeCard: {
@@ -102,41 +102,41 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderRadius: 16,
-    backgroundColor: "rgba(96, 32, 32, 0.5)",
+    backgroundColor: 'rgba(96, 32, 32, 0.5)',
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
   },
   recipeImage: {
-    width: "100%",
+    width: '100%',
     height: 150,
     borderRadius: 16,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: '#f2f2f2',
   },
   recipeTitle: {
     marginTop: 8,
     fontSize: 16,
-    fontWeight: "800",
-    color: "white",
+    fontWeight: '800',
+    color: 'white',
   },
   recipeTipo: {
     marginTop: 8,
     fontSize: 14,
-    fontWeight: "500",
-    color: "white",
+    fontWeight: '500',
+    color: 'white',
   },
   recipeDificultad: {
     marginTop: 8,
     fontSize: 14,
-    fontWeight: "500",
-    color: "white",
+    fontWeight: '500',
+    color: 'white',
   },
   containerText: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });

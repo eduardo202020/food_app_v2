@@ -10,42 +10,42 @@ import {
   TextInput,
   Button,
   Linking,
-} from "react-native";
-import React, { useEffect, useState } from "react";
-import TrendingRecipes from "@/components/TrendingRecipes";
+} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import TrendingRecipes from '@/components/TrendingRecipes';
 import {
   recipeProps as foodDataProps,
   recipeData as foodData,
-} from "@/data/recetario";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import Categorias from "@/components/Categorias";
-import Dificultades from "@/components/Dificultad";
+} from '@/data/recetario';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { FontAwesome, FontAwesome6 } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import Categorias from '@/components/Categorias';
+import Dificultades from '@/components/Dificultad';
 
-import { RecipeCard } from "@/components/RecipeCard";
-import { claves } from "@/data/encript";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RecipeCard } from '@/components/RecipeCard';
+import { claves } from '@/data/encript';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import * as SplashScreen from "expo-splash-screen";
+import * as SplashScreen from 'expo-splash-screen';
 
 const index = () => {
   const router = useRouter();
 
   // Estado para la categoría activa y las recetas filtradas
-  const [activeCategory, setActiveCategory] = useState<string>("Todo");
+  const [activeCategory, setActiveCategory] = useState<string>('Todo');
 
   // Estado para la dificultad activa y las recetas filtradas
-  const [activeDificultad, setActiveDificultad] = useState<string>("Todo");
+  const [activeDificultad, setActiveDificultad] = useState<string>('Todo');
 
   const [filteredRecipes, setFilteredRecipes] =
     useState<foodDataProps[]>(foodData);
 
   // Estado para la verificación del código
   const [modalVisible, setModalVisible] = useState(true);
-  const [inputValue, setInputValue] = useState("");
-  const [selectedKey, setSelectedKey] = useState("");
-  const [selectedValue, setSelectedValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
+  const [selectedKey, setSelectedKey] = useState('');
+  const [selectedValue, setSelectedValue] = useState('');
 
   // Prevent the splash screen from hiding automatically
   useEffect(() => {
@@ -56,13 +56,13 @@ const index = () => {
   const updateFilteredRecipes = (category: string, dificultad: string) => {
     let updatedRecipes = foodData;
 
-    if (category !== "Todo") {
+    if (category !== 'Todo') {
       updatedRecipes = updatedRecipes.filter(
         (recipe) => recipe.tipo === category
       );
     }
 
-    if (dificultad !== "Todo") {
+    if (dificultad !== 'Todo') {
       updatedRecipes = updatedRecipes.filter(
         (recipe) => recipe.nivel_complejidad === dificultad
       );
@@ -73,14 +73,14 @@ const index = () => {
 
   // Función para manejar el cambio de dificultad
   const handleDificultad = (dificultad: string) => {
-    const newDificultad = activeDificultad === dificultad ? "Todo" : dificultad;
+    const newDificultad = activeDificultad === dificultad ? 'Todo' : dificultad;
     setActiveDificultad(newDificultad);
     updateFilteredRecipes(activeCategory, newDificultad);
   };
 
   // Función para manejar el cambio de categoría
   const handleChangeCategory = (category: string) => {
-    const newCategory = activeCategory === category ? "Todo" : category;
+    const newCategory = activeCategory === category ? 'Todo' : category;
     setActiveCategory(newCategory);
     updateFilteredRecipes(newCategory, activeDificultad);
   };
@@ -88,8 +88,8 @@ const index = () => {
   // Verifica si el código ya ha sido validado antes
   useEffect(() => {
     const checkVerification = async () => {
-      const verified = await AsyncStorage.getItem("isVerified");
-      if (verified === "true") {
+      const verified = await AsyncStorage.getItem('isVerified');
+      if (verified === 'true') {
         setModalVisible(false);
       } else {
         const randomIndex = Math.floor(Math.random() * claves.length);
@@ -108,15 +108,15 @@ const index = () => {
   // Validar la entrada del usuario y guardar el estado de verificación
   const handleValidation = async () => {
     if (inputValue === selectedValue) {
-      await AsyncStorage.setItem("isVerified", "true");
+      await AsyncStorage.setItem('isVerified', 'true');
       setModalVisible(false);
     } else {
-      alert("Código incorrecto. Inténtalo de nuevo.");
+      alert('Código incorrecto. Inténtalo de nuevo.');
     }
   };
 
   const handleWhatsAppPress = () => {
-    const phoneNumber = "+51936364807"; // Reemplaza con tu número de teléfono incluyendo el código de país
+    const phoneNumber = '+51991004126'; // Reemplaza con tu número de teléfono incluyendo el código de país
     const message = `Hola, necesito la clave para acceder a la app.\nMi código actual es:\n${selectedKey}`; // Mensaje a enviar
     // Mensaje a enviar
     const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
@@ -124,7 +124,7 @@ const index = () => {
     )}`;
 
     Linking.openURL(url).catch(() => {
-      alert("Asegúrate de tener WhatsApp instalado en tu dispositivo");
+      alert('Asegúrate de tener WhatsApp instalado en tu dispositivo');
     });
   };
 
@@ -132,19 +132,19 @@ const index = () => {
   const clearAsyncStorage = async () => {
     try {
       await AsyncStorage.clear();
-      console.log("AsyncStorage ha sido borrado.");
+      console.log('AsyncStorage ha sido borrado.');
     } catch (error) {
-      console.error("Error al borrar AsyncStorage:", error);
+      console.error('Error al borrar AsyncStorage:', error);
     }
   };
 
   return (
     <ImageBackground
-      source={require("@/assets/images/madera4.jpg")}
+      source={require('@/assets/images/madera4.jpg')}
       style={{ flex: 1 }}
       width={100}
     >
-      <StatusBar barStyle={"dark-content"} />
+      <StatusBar barStyle={'dark-content'} />
       <SafeAreaView>
         {/* Modal de verificación */}
         {modalVisible && (
@@ -166,7 +166,7 @@ const index = () => {
                   placeholder="Introduce el valor"
                   placeholderTextColor="gray"
                 />
-                <View style={{ display: "flex" }}>
+                <View style={{ display: 'flex' }}>
                   <Button title="Validar" onPress={handleValidation} />
                   <TouchableOpacity
                     style={styles.whatsappButton}
@@ -186,8 +186,8 @@ const index = () => {
         <View className="pb-4 flex-row justify-between items-center mx-4 border-solid border-b-stone-900 ">
           <FontAwesome6 name="bars-staggered" size={24} color="white" />
           <Text className="text-white text-3xl font-bold">
-            <Text style={styles.text}>E</Text>l{" "}
-            <Text style={styles.text}>G</Text>ran{" "}
+            <Text style={styles.text}>E</Text>l{' '}
+            <Text style={styles.text}>G</Text>ran{' '}
             <Text style={styles.text}>C</Text>hef
           </Text>
           <TouchableOpacity>
@@ -235,54 +235,54 @@ export default index;
 // crea los estilos
 const styles = StyleSheet.create({
   text: {
-    color: "yellow",
+    color: 'yellow',
     fontSize: 30,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: "80%",
-    backgroundColor: "white",
+    width: '80%',
+    backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   modalText: {
     marginBottom: 15,
     fontSize: 18,
-    textAlign: "center",
+    textAlign: 'center',
   },
   modalKey: {
     marginBottom: 15,
     fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   input: {
     height: 40,
-    borderColor: "gray",
+    borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 20,
-    width: "100%",
+    width: '100%',
   },
   whatsappButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#25D366", // Color de WhatsApp
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#25D366', // Color de WhatsApp
     padding: 10,
     borderRadius: 5,
     marginTop: 15,
   },
   whatsappButtonText: {
     marginLeft: 10,
-    color: "white",
+    color: 'white',
     fontSize: 16,
   },
 });

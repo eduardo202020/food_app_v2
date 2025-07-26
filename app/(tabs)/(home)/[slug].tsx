@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,18 +9,18 @@ import {
   Dimensions,
   Modal,
   ImageBackground,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+} from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ChevronLeftIcon,
   BoltIcon,
   UsersIcon,
   TvIcon,
-} from "react-native-heroicons/outline";
+} from 'react-native-heroicons/outline';
 
-import { HeartIcon } from "react-native-heroicons/solid";
+import { HeartIcon } from 'react-native-heroicons/solid';
 
-import { recipeData as foodData } from "@/data/recetario";
+import { recipeData as foodData } from '@/data/recetario';
 
 interface RecipeStep {
   title: string;
@@ -30,32 +30,32 @@ interface RecipeStep {
   verbosClave: string[];
 }
 
-import { useIsRecipeLiked } from "@/hooks/useIsRecipeLiked";
-import { useLikedRecipes } from "@/hooks/useLikedRecipes";
+import { useIsRecipeLiked } from '@/hooks/useIsRecipeLiked';
+import { useLikedRecipes } from '@/hooks/useLikedRecipes';
 
-import { categorias } from "@/data/categorias";
+import { categorias } from '@/data/categorias';
 
-import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+} from 'react-native-responsive-screen';
 
-import { WebView } from "react-native-webview";
+import { WebView } from 'react-native-webview';
 
-import { glosario } from "@/data/glosario";
-import { StatusBar } from "expo-status-bar";
-import { Image } from "expo-image";
+import { glosario } from '@/data/glosario';
+import { StatusBar } from 'expo-status-bar';
+import { Image } from 'expo-image';
 
 const getNumberDificultad = (value: string): number => {
   switch (value) {
-    case "Fácil":
+    case 'Fácil':
       return 1;
-    case "Intermedio":
+    case 'Intermedio':
       return 2;
-    case "Avanzado":
+    case 'Avanzado':
       return 3;
-    case "Desafiante":
+    case 'Desafiante':
       return 4;
     default:
       return 0;
@@ -101,7 +101,7 @@ const RecipeDetail = () => {
     }
   };
 
-  const colorStatusBar = modalVisible || modalVisibleGlosary ? "#00000080" : "";
+  const colorStatusBar = modalVisible || modalVisibleGlosary ? '#00000080' : '';
 
   const handleOpenSteps = () => {
     const stepsArray: any = [];
@@ -154,7 +154,7 @@ const RecipeDetail = () => {
 
   return (
     <ImageBackground
-      source={require("@/assets/images/madera4.jpg")}
+      source={require('@/assets/images/madera4.jpg')}
       style={{ flex: 1 }}
       width={100}
     >
@@ -171,18 +171,18 @@ const RecipeDetail = () => {
             <Image
               source={{ uri: recipe.media[0] }}
               style={{
-                width: "100%",
+                width: '100%',
                 height: hp(25),
                 borderRadius: 53,
                 borderTopLeftRadius: 0,
                 borderTopRightRadius: 0,
                 borderBottomLeftRadius: 40,
                 borderBottomRightRadius: 40,
-                resizeMode: "cover",
+                resizeMode: 'cover',
               }}
-              cachePolicy={"disk"}
+              cachePolicy={'disk'}
               contentFit="cover"
-              placeholder={require("@/assets/images/action/plato.jpg")}
+              placeholder={require('@/assets/images/action/plato.jpg')}
               transition={1000}
             />
           </View>
@@ -208,7 +208,7 @@ const RecipeDetail = () => {
               <HeartIcon
                 size={hp(3.5)}
                 strokeWidth={4.5}
-                color={isLiked ? "red" : "gray"}
+                color={isLiked ? 'red' : 'gray'}
               />
             </TouchableOpacity>
           </Animated.View>
@@ -348,7 +348,7 @@ const RecipeDetail = () => {
                       style={{ fontSize: hp(2.5), paddingBottom: 4 }}
                       className="font-bold text-white"
                     >
-                      {key == "ingredientes" ? "" : key}
+                      {key == 'ingredientes' ? '' : key}
                     </Text>
                     {recipe.ingredientes[key].map((ingredient, i) => (
                       <View key={i} className="flex-row space-x-4 ">
@@ -389,7 +389,7 @@ const RecipeDetail = () => {
                   className="space-y-1"
                   style={{
                     borderRadius: 8,
-                    backgroundColor: "rgba(10, 10, 10, 0.4)",
+                    backgroundColor: 'rgba(10, 10, 10, 0.4)',
                     paddingHorizontal: 4,
                     paddingVertical: 8,
                   }}
@@ -398,7 +398,7 @@ const RecipeDetail = () => {
                     style={{ fontSize: hp(2.5) }}
                     className="font-bold text-white"
                   >
-                    {key == "pasos" ? "" : key}
+                    {key == 'pasos' ? '' : key}
                   </Text>
                   {recipe.preparacion[key].map((step, i) => (
                     <Text
@@ -457,7 +457,7 @@ const RecipeDetail = () => {
                 >
                   Glosario:
                 </Text>
-                <View className="space-y-2" style={{ width: "100%" }}>
+                <View className="space-y-2" style={{ width: '100%' }}>
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -472,7 +472,7 @@ const RecipeDetail = () => {
                         <View style={[styles.imageContainer]}>
                           <Text
                             className="text-neutral-600"
-                            style={{ fontSize: hp(1.8), color: "#007AFF" }}
+                            style={{ fontSize: hp(1.8), color: '#007AFF' }}
                           >
                             {term}
                           </Text>
@@ -557,7 +557,7 @@ const RecipeDetail = () => {
           }}
         >
           <Image
-            source={require("@/assets/images/cook.png")}
+            source={require('@/assets/images/cook.png')}
             style={{ width: 45, height: 45, padding: 10 }}
           />
         </TouchableOpacity>
@@ -571,17 +571,17 @@ const RecipeDetail = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>
-                {recipeSteps[currentStep]?.title == "pasos"
-                  ? "Instrucciones:"
+                {recipeSteps[currentStep]?.title == 'pasos'
+                  ? 'Instrucciones:'
                   : recipeSteps[currentStep]?.title}
               </Text>
               <Text style={styles.modalTextTitle}>
-                Paso {recipeSteps[currentStep]?.stepNumber} de{" "}
+                Paso {recipeSteps[currentStep]?.stepNumber} de{' '}
                 {recipeSteps[currentStep]?.totalSteps}
               </Text>
               <Text style={styles.modalText}>
                 {recipeSteps[currentStep]?.texto ||
-                  "No hay información disponible"}
+                  'No hay información disponible'}
               </Text>
               <View style={styles.stepNavigation}>
                 <TouchableOpacity
@@ -624,7 +624,7 @@ const RecipeDetail = () => {
 
 const styles = StyleSheet.create({
   videoContainer: {
-    width: Dimensions.get("window").width * 0.8,
+    width: Dimensions.get('window').width * 0.8,
     height: 200,
     marginRight: 10,
   },
@@ -634,14 +634,14 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     paddingHorizontal: 15,
     paddingRight: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   tipCard: {
-    backgroundColor: "rgba(96, 32, 32, 0.5)",
+    backgroundColor: 'rgba(96, 32, 32, 0.5)',
     padding: 15,
     borderRadius: 8,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -650,32 +650,32 @@ const styles = StyleSheet.create({
 
   tipText: {
     fontSize: hp(2),
-    color: "white",
+    color: 'white',
   },
 
   touchableOpacity: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 4,
   },
   imageContainer: {
     borderRadius: 50,
     padding: 6,
-    backgroundColor: "#E0E0E0",
-    borderColor: "#007AFF",
+    backgroundColor: '#E0E0E0',
+    borderColor: '#007AFF',
     borderWidth: 2,
   },
   fab: {
-    position: "absolute",
+    position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: "#fbbf24",
+    backgroundColor: '#fbbf24',
     width: 65,
     height: 65,
     borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -684,55 +684,55 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
-    width: "80%",
-    backgroundColor: "white",
+    width: '80%',
+    backgroundColor: 'white',
     borderRadius: 10,
     padding: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: hp(2.5),
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 15,
   },
   modalText: {
     fontSize: hp(2.2),
     marginBottom: 20,
-    textAlign: "left",
+    textAlign: 'left',
   },
   stepNavigation: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
     marginTop: 20,
   },
   stepButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     borderRadius: 5,
   },
   stepButtonText: {
-    color: "white",
+    color: 'white',
     fontSize: hp(2),
   },
   disabledButton: {
-    backgroundColor: "#A0A0A0",
+    backgroundColor: '#A0A0A0',
   },
   closeButton: {
     marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     borderRadius: 5,
   },
   closeButtonText: {
-    color: "white",
+    color: 'white',
     fontSize: hp(2),
   },
   modalTextTitle: {
@@ -743,43 +743,43 @@ const styles = StyleSheet.create({
   verbosClaveContainer: {
     marginTop: 15,
     marginBottom: 20,
-    display: "flex",
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-around",
+    display: 'flex',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
   bulletPointContainer: {
-    display: "flex",
-    justifyContent: "center",
-    flexDirection: "row",
-    alignItems: "stretch",
-    alignContent: "space-between",
+    display: 'flex',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    alignContent: 'space-between',
     marginBottom: 8,
   },
 
   verbosClaveText: {
     fontSize: hp(2),
-    color: "#525252",
+    color: '#525252',
     marginBottom: 8,
   },
   bulletPoint: {
     width: hp(1),
     height: hp(1),
     borderRadius: 50,
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     top: 8,
     marginRight: 4,
   },
   bulletPointContainerTips: {
-    display: "flex",
-    flexDirection: "row",
+    display: 'flex',
+    flexDirection: 'row',
     marginBottom: 8,
   },
   bulletPointTips: {
     width: hp(1),
     height: hp(1),
     borderRadius: 50,
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     top: 8,
     marginRight: 4,
   },

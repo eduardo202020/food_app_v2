@@ -12,7 +12,7 @@ import React, { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { XMarkIcon } from "react-native-heroicons/outline";
 
-import { RecipeCard } from "@/components/Recetas";
+import { RecipeCard } from "@/components/RecipeCard";
 
 import {
   recipeProps as foodDataProps,
