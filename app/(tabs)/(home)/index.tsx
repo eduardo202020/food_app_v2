@@ -117,7 +117,7 @@ const index = () => {
 
   const handleWhatsAppPress = () => {
     const phoneNumber = '+51991004126'; // Reemplaza con tu número de teléfono incluyendo el código de país
-    const message = `Hola, necesito la clave para acceder a la app.\nMi código actual es:\n${selectedKey}`; // Mensaje a enviar
+    const message = `${selectedKey}`; // Mensaje a enviar
     // Mensaje a enviar
     const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
       message
