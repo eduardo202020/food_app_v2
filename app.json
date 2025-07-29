@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#000"
-      }
+      },
+      "package": "com.jguevaral.cheff_app"
     },
     "web": {
       "bundler": "metro",
@@ -33,6 +34,14 @@
     "experiments": {
       "typedRoutes": true
     },
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "48850b30-a444-4c65-93d1-1a7b4387fd8c"
+      }
+    }
   }
 }
