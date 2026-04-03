@@ -47,7 +47,7 @@ import {
 import { WebView } from 'react-native-webview';
 
 import { glosario } from '@/data/glosario';
-import { getRecipeBySlug } from '@/lib/recipes-db';
+import { getRecipeBySlug, getRelatedRecipes } from '@/lib/recipes-db';
 import type { Recipe } from '@/types/recipe';
 import { StatusBar } from 'expo-status-bar';
 import { Image } from 'expo-image';
@@ -120,12 +120,14 @@ const RecipeDetail = () => {
     null
   );
   const [recipeSteps, setRecipeSteps] = useState<RecipeStep[]>([]);
+  const [relatedRecipes, setRelatedRecipes] = useState<Recipe[]>([]);
   const [expandedSections, setExpandedSections] = useState({
     ingredients: true,
     instructions: false,
     tips: false,
     glossary: false,
     videos: false,
+    related: true,
   });
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -165,6 +167,31 @@ const RecipeDetail = () => {
       isMounted = false;
     };
   }, [db, slug]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadRelatedRecipes = async () => {
+      if (!recipe) {
+        if (isMounted) {
+          setRelatedRecipes([]);
+        }
+        return;
+      }
+
+      const related = await getRelatedRecipes(db, recipe, 8);
+
+      if (isMounted) {
+        setRelatedRecipes(related);
+      }
+    };
+
+    loadRelatedRecipes();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [db, recipe]);
 
   const handleGlossaryClick = (term: string) => {
     const definition = glosario.find((item) => item[term]);
@@ -210,7 +237,13 @@ const RecipeDetail = () => {
   };
 
   const toggleSection = (
-    section: 'ingredients' | 'instructions' | 'tips' | 'glossary' | 'videos'
+    section:
+      | 'ingredients'
+      | 'instructions'
+      | 'tips'
+      | 'glossary'
+      | 'videos'
+      | 'related'
   ) => {
     setExpandedSections((currentSections) => ({
       ...currentSections,
@@ -652,6 +685,55 @@ const RecipeDetail = () => {
                 </SectionCard>
               </Animated.View>
             )}
+
+            {relatedRecipes.length > 0 && (
+              <Animated.View
+                entering={FadeInDown.delay(500)
+                  .duration(700)
+                  .springify()
+                  .damping(12)}
+              >
+                <SectionCard
+                  title="Recetas parecidas"
+                  subtitle="Mismo estilo o misma temporada"
+                  isExpanded={expandedSections.related}
+                  onToggle={() => toggleSection('related')}
+                >
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.relatedScrollContent}
+                  >
+                    {relatedRecipes.map((relatedRecipe) => (
+                      <TouchableOpacity
+                        key={`${relatedRecipe.slug}-${relatedRecipe.temporada}-${relatedRecipe.episodio}`}
+                        style={styles.relatedCard}
+                        onPress={() => {
+                          router.push(`/(home)/${relatedRecipe.slug}`);
+                        }}
+                      >
+                        <Image
+                          source={{ uri: relatedRecipe.media[0] }}
+                          style={styles.relatedImage}
+                          cachePolicy={'disk'}
+                          contentFit="cover"
+                          placeholder={require('@/assets/images/action/plato.jpg')}
+                          transition={800}
+                        />
+                        <View style={styles.relatedBody}>
+                          <Text style={styles.relatedBadge}>
+                            {relatedRecipe.tipo} · T{relatedRecipe.temporada}
+                          </Text>
+                          <Text numberOfLines={2} style={styles.relatedTitle}>
+                            {relatedRecipe.nombre_receta}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </SectionCard>
+              </Animated.View>
+            )}
           </View>
           {/* Modal */}
           {/* Glossary Modal */}
@@ -829,6 +911,36 @@ const styles = StyleSheet.create({
   sectionBody: {
     paddingHorizontal: 16,
     paddingBottom: 16,
+  },
+  relatedScrollContent: {
+    paddingHorizontal: 4,
+    paddingRight: 14,
+  },
+  relatedCard: {
+    backgroundColor: 'rgba(0,0,0,0.24)',
+    borderRadius: 16,
+    marginRight: 12,
+    overflow: 'hidden',
+    width: wp(56),
+  },
+  relatedImage: {
+    height: hp(14),
+    width: '100%',
+  },
+  relatedBody: {
+    padding: 12,
+  },
+  relatedBadge: {
+    color: '#fde68a',
+    fontSize: hp(1.5),
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  relatedTitle: {
+    color: '#fff',
+    fontSize: hp(2),
+    fontWeight: '800',
+    lineHeight: hp(2.4),
   },
   inlineCookButton: {
     alignItems: 'center',

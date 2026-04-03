@@ -202,3 +202,29 @@ export const getRecipesBySlugs = async (
     .map((recipeSlug) => recipes.find((recipe) => recipe.slug === recipeSlug))
     .filter((recipe): recipe is Recipe => recipe !== undefined);
 };
+
+export const getRelatedRecipes = async (
+  db: SQLiteDatabase,
+  currentRecipe: Pick<Recipe, 'slug' | 'tipo' | 'temporada'>,
+  limit = 6
+) => {
+  const rows = await db.getAllAsync<RecipeRow>(
+    `${RECIPE_SELECT}
+     WHERE slug != ?
+       AND (tipo = ? OR temporada = ?)
+     ORDER BY
+       CASE WHEN tipo = ? THEN 0 ELSE 1 END,
+       CASE WHEN temporada = ? THEN 0 ELSE 1 END,
+       temporada DESC,
+       episodio ASC
+     LIMIT ?`,
+    currentRecipe.slug,
+    currentRecipe.tipo,
+    currentRecipe.temporada,
+    currentRecipe.tipo,
+    currentRecipe.temporada,
+    limit
+  );
+
+  return rows.map(parseRecipeRow);
+};

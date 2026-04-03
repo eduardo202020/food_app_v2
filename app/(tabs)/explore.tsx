@@ -8,6 +8,7 @@ import {
   ImageBackground,
   StyleSheet,
   FlatList,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +19,28 @@ import { RecipeCard } from "@/components/RecipeCard";
 import { getRecipes } from "@/lib/recipes-db";
 import type { Recipe } from "@/types/recipe";
 import { useRouter } from "expo-router";
+import { temporadas } from "@/data/temporadas";
+
+const difficultyOptions = ["Todo", "Fácil", "Intermedio", "Avanzado", "Desafiante"];
+
+const FilterChip = ({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    onPress={onPress}
+    style={[styles.filterChip, active && styles.filterChipActive]}
+  >
+    <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
+      {label}
+    </Text>
+  </TouchableOpacity>
+);
 
 const SearchScreen = () => {
   const db = useSQLiteContext();
@@ -28,6 +51,9 @@ const SearchScreen = () => {
   const [results, setResults] = useState<Recipe[]>([]);
   const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("Todo");
+  const [activeSeason, setActiveSeason] = useState<number | "Todo">("Todo");
+  const [activeDifficulty, setActiveDifficulty] = useState("Todo");
 
   useEffect(() => {
     let isMounted = true;
@@ -57,20 +83,29 @@ const SearchScreen = () => {
   useEffect(() => {
     const normalizedSearch = searchText.trim().toLowerCase();
 
-    if (!normalizedSearch) {
-      setResults(allRecipes);
-      setIsSearching(false);
-      return () => {
-        undefined;
-      };
-    }
-
     setIsSearching(true);
 
     const timeoutId = setTimeout(() => {
-      const filteredRecipes = allRecipes.filter((recipe) =>
-        recipe.nombre_receta.toLowerCase().includes(normalizedSearch)
-      );
+      const filteredRecipes = allRecipes.filter((recipe) => {
+        const matchesSearch = !normalizedSearch
+          ? true
+          : recipe.nombre_receta.toLowerCase().includes(normalizedSearch);
+        const matchesCategory =
+          activeCategory === "Todo" ? true : recipe.tipo === activeCategory;
+        const matchesSeason =
+          activeSeason === "Todo" ? true : recipe.temporada === activeSeason;
+        const matchesDifficulty =
+          activeDifficulty === "Todo"
+            ? true
+            : recipe.nivel_complejidad === activeDifficulty;
+
+        return (
+          matchesSearch &&
+          matchesCategory &&
+          matchesSeason &&
+          matchesDifficulty
+        );
+      });
 
       setResults(filteredRecipes);
       setIsSearching(false);
@@ -79,7 +114,15 @@ const SearchScreen = () => {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [allRecipes, searchText]);
+  }, [activeCategory, activeDifficulty, activeSeason, allRecipes, searchText]);
+
+  const categoryOptions = React.useMemo(
+    () => [
+      "Todo",
+      ...Array.from(new Set(allRecipes.map((recipe) => recipe.tipo))).sort(),
+    ],
+    [allRecipes]
+  );
 
   return (
     <ImageBackground
@@ -136,6 +179,60 @@ const SearchScreen = () => {
             contentContainerStyle={styles.gridContent}
             ListHeaderComponent={
               <View style={styles.resultsHeader}>
+                <View style={styles.filtersBlock}>
+                  <Text style={styles.filtersTitle}>Categorias</Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.filterRow}
+                  >
+                    {categoryOptions.map((category) => (
+                      <FilterChip
+                        key={category}
+                        label={category}
+                        active={activeCategory === category}
+                        onPress={() => setActiveCategory(category)}
+                      />
+                    ))}
+                  </ScrollView>
+
+                  <Text style={styles.filtersTitle}>Temporadas</Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.filterRow}
+                  >
+                    <FilterChip
+                      label="Todo"
+                      active={activeSeason === "Todo"}
+                      onPress={() => setActiveSeason("Todo")}
+                    />
+                    {temporadas.map((temporada) => (
+                      <FilterChip
+                        key={temporada.temporada}
+                        label={`T${temporada.temporada}`}
+                        active={activeSeason === temporada.temporada}
+                        onPress={() => setActiveSeason(temporada.temporada)}
+                      />
+                    ))}
+                  </ScrollView>
+
+                  <Text style={styles.filtersTitle}>Dificultad</Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.filterRow}
+                  >
+                    {difficultyOptions.map((difficulty) => (
+                      <FilterChip
+                        key={difficulty}
+                        label={difficulty}
+                        active={activeDifficulty === difficulty}
+                        onPress={() => setActiveDifficulty(difficulty)}
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
                 <Text className="text-white font-semibold ml-1 ">
                   {searchText ? `Resultados (${results.length})` : "Todas las recetas"}
                 </Text>
@@ -178,6 +275,42 @@ const styles = StyleSheet.create({
   resultsHeader: {
     marginBottom: 12,
     paddingHorizontal: 6,
+  },
+  filtersBlock: {
+    marginBottom: 14,
+  },
+  filtersTitle: {
+    color: "#fef3c7",
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 6,
+    marginLeft: 4,
+    marginTop: 10,
+  },
+  filterRow: {
+    paddingHorizontal: 2,
+    paddingRight: 10,
+  },
+  filterChip: {
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderColor: "rgba(255,255,255,0.16)",
+    borderRadius: 999,
+    borderWidth: 1,
+    marginRight: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  filterChipActive: {
+    backgroundColor: "#fbbf24",
+    borderColor: "#fbbf24",
+  },
+  filterChipText: {
+    color: "white",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  filterChipTextActive: {
+    color: "#3a2200",
   },
   filteringText: {
     color: "#fde68a",
