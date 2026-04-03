@@ -61,8 +61,9 @@ const TrendingRecipes = () => {
             }}
           />
         )}
-        firstItem={1}
-        inactiveSlideScale={0.8}
+        firstItem={0}
+        inactiveSlideScale={0.9}
+        inactiveSlideOpacity={1}
         sliderWidth={width}
         itemWidth={width * 0.7}
         slideStyle={styles.slideStyle}
