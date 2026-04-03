@@ -15,9 +15,12 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ChevronLeftIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
   BoltIcon,
   UsersIcon,
   TvIcon,
+  PlayIcon,
 } from 'react-native-heroicons/outline';
 
 import { HeartIcon } from 'react-native-heroicons/solid';
@@ -69,6 +72,39 @@ const getCategoryImage = (value: string): any => {
   return category ? category.imagen : categorias[6].imagen;
 };
 
+const SectionCard = ({
+  title,
+  subtitle,
+  isExpanded,
+  onToggle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  isExpanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) => {
+  return (
+    <View style={styles.sectionCard}>
+      <TouchableOpacity onPress={onToggle} style={styles.sectionHeader}>
+        <View style={styles.sectionHeaderText}>
+          <Text style={styles.sectionTitle}>{title}</Text>
+          {subtitle ? <Text style={styles.sectionSubtitle}>{subtitle}</Text> : null}
+        </View>
+        <View style={styles.sectionIconWrap}>
+          {isExpanded ? (
+            <ChevronUpIcon size={hp(2.4)} color="#fbbf24" />
+          ) : (
+            <ChevronDownIcon size={hp(2.4)} color="#fbbf24" />
+          )}
+        </View>
+      </TouchableOpacity>
+      {isExpanded ? <View style={styles.sectionBody}>{children}</View> : null}
+    </View>
+  );
+};
+
 const RecipeDetail = () => {
   const db = useSQLiteContext();
   const { slug } = useLocalSearchParams();
@@ -84,6 +120,13 @@ const RecipeDetail = () => {
     null
   );
   const [recipeSteps, setRecipeSteps] = useState<RecipeStep[]>([]);
+  const [expandedSections, setExpandedSections] = useState({
+    ingredients: true,
+    instructions: false,
+    tips: false,
+    glossary: false,
+    videos: false,
+  });
 
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -164,6 +207,15 @@ const RecipeDetail = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const toggleSection = (
+    section: 'ingredients' | 'instructions' | 'tips' | 'glossary' | 'videos'
+  ) => {
+    setExpandedSections((currentSections) => ({
+      ...currentSections,
+      [section]: !currentSections[section],
+    }));
   };
 
   // manejo de favoritos
@@ -296,6 +348,27 @@ const RecipeDetail = () => {
               </Text>
             </Animated.View>
 
+            <Animated.View
+              entering={FadeInDown.delay(50).duration(700).springify().damping(12)}
+              style={styles.quickActionsRow}
+            >
+              <TouchableOpacity
+                onPress={handleOpenSteps}
+                style={[styles.quickActionButton, styles.quickActionPrimary]}
+              >
+                <PlayIcon size={hp(2.2)} color="#3a2200" />
+                <Text style={styles.quickActionPrimaryText}>Modo cocinar</Text>
+              </TouchableOpacity>
+              {recipe.media.length > 1 ? (
+                <TouchableOpacity
+                  onPress={() => toggleSection('videos')}
+                  style={styles.quickActionButton}
+                >
+                  <Text style={styles.quickActionText}>Ver videos</Text>
+                </TouchableOpacity>
+              ) : null}
+            </Animated.View>
+
             {/* Miscellaneous information */}
             <Animated.View
               entering={FadeInDown.delay(100)
@@ -395,200 +468,188 @@ const RecipeDetail = () => {
               </View>
             </Animated.View>
 
-            {/* Ingredients */}
             <Animated.View
               entering={FadeInDown.delay(200)
                 .duration(700)
                 .springify()
                 .damping(12)}
-              className="space-y-4 "
             >
-              <Text
-                style={{ fontSize: hp(3.2) }}
-                className="font-bold flex-1 text-white"
+              <SectionCard
+                title="Ingredientes"
+                subtitle={`${Object.values(recipe.ingredientes).flat().length} items`}
+                isExpanded={expandedSections.ingredients}
+                onToggle={() => toggleSection('ingredients')}
               >
-                Ingredientes:
-              </Text>
-              <View className="space-y-2 ml-3 mb-4 ">
-                {Object.keys(recipe.ingredientes).map((key) => (
-                  <View key={key} className="space-y-1">
-                    <Text
-                      style={{ fontSize: hp(2.5), paddingBottom: 4 }}
-                      className="font-bold text-white"
-                    >
-                      {key == 'ingredientes' ? '' : key}
-                    </Text>
-                    {recipe.ingredientes[key].map((ingredient, i) => (
-                      <View key={i} className="flex-row space-x-4 ">
-                        <View
-                          style={{ height: hp(1.5), width: hp(1.5) }}
-                          className="bg-amber-300 rounded-full"
-                        />
-                        <Text
-                          style={{ fontSize: hp(2.2) }}
-                          className="font-medium text-white"
-                        >
-                          {ingredient}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                ))}
-              </View>
-            </Animated.View>
-
-            {/* Instructions */}
-            <Animated.View
-              entering={FadeInDown.delay(300)
-                .duration(700)
-                .springify()
-                .damping(12)}
-              className="space-y-4"
-            >
-              <Text
-                style={{ fontSize: hp(3.2) }}
-                className="font-bold flex-1 text-white"
-              >
-                Instrucciones:
-              </Text>
-              {Object.keys(recipe.preparacion).map((key) => (
-                <View
-                  key={key}
-                  className="space-y-1"
-                  style={{
-                    borderRadius: 8,
-                    backgroundColor: 'rgba(10, 10, 10, 0.4)',
-                    paddingHorizontal: 4,
-                    paddingVertical: 8,
-                  }}
-                >
-                  <Text
-                    style={{ fontSize: hp(2.5) }}
-                    className="font-bold text-white"
-                  >
-                    {key == 'pasos' ? '' : key}
-                  </Text>
-                  {recipe.preparacion[key].map((step, i) => (
-                    <Text
-                      key={i}
-                      style={{ fontSize: hp(2.2), marginBottom: 4 }}
-                      className="text-white"
-                    >
-                      {/* {step.texto} */}
-                      {step}
-                    </Text>
-                  ))}
-                </View>
-              ))}
-            </Animated.View>
-
-            {/* Tips */}
-            {recipe.tips && recipe.tips.length > 0 && (
-              <Animated.View
-                entering={FadeInDown.delay(500)
-                  .duration(700)
-                  .springify()
-                  .damping(12)}
-                className="space-y-4"
-              >
-                <Text
-                  style={{ fontSize: hp(3) }}
-                  className="font-bold flex-1 text-white"
-                >
-                  Tips:
-                </Text>
-                <View style={styles.tipCard}>
-                  {recipe.tips.map((tip, index) => (
-                    <View key={index} style={styles.bulletPointContainerTips}>
-                      <View style={styles.bulletPointTips} />
-                      <Text style={styles.tipText}>{tip}</Text>
+                <View className="space-y-2 ml-3">
+                  {Object.keys(recipe.ingredientes).map((key) => (
+                    <View key={key} className="space-y-1">
+                      <Text
+                        style={{ fontSize: hp(2.4), paddingBottom: 4 }}
+                        className="font-bold text-white"
+                      >
+                        {key == 'ingredientes' ? '' : key}
+                      </Text>
+                      {recipe.ingredientes[key].map((ingredient, i) => (
+                        <View key={i} className="flex-row space-x-4 ">
+                          <View
+                            style={{ height: hp(1.4), width: hp(1.4) }}
+                            className="bg-amber-300 rounded-full"
+                          />
+                          <Text
+                            style={{ fontSize: hp(2.1) }}
+                            className="font-medium text-white"
+                          >
+                            {ingredient}
+                          </Text>
+                        </View>
+                      ))}
                     </View>
                   ))}
                 </View>
-              </Animated.View>
-            )}
+              </SectionCard>
+            </Animated.View>
 
-            {/* Glosario */}
+            <Animated.View
+              entering={FadeInDown.delay(260)
+                .duration(700)
+                .springify()
+                .damping(12)}
+            >
+              <SectionCard
+                title="Instrucciones"
+                subtitle={`${recipeSteps.length || Object.values(recipe.preparacion).flat().length} pasos`}
+                isExpanded={expandedSections.instructions}
+                onToggle={() => toggleSection('instructions')}
+              >
+                <TouchableOpacity
+                  onPress={handleOpenSteps}
+                  style={styles.inlineCookButton}
+                >
+                  <PlayIcon size={hp(2)} color="#3a2200" />
+                  <Text style={styles.inlineCookButtonText}>Abrir modo cocinar</Text>
+                </TouchableOpacity>
+                {Object.keys(recipe.preparacion).map((key) => (
+                  <View key={key} style={styles.instructionsGroup}>
+                    <Text
+                      style={{ fontSize: hp(2.4) }}
+                      className="font-bold text-white"
+                    >
+                      {key == 'pasos' ? '' : key}
+                    </Text>
+                    {recipe.preparacion[key].map((step, i) => (
+                      <Text
+                        key={i}
+                        style={{ fontSize: hp(2.1), marginBottom: 6 }}
+                        className="text-white"
+                      >
+                        {step}
+                      </Text>
+                    ))}
+                  </View>
+                ))}
+              </SectionCard>
+            </Animated.View>
 
-            {/* Glossary Section */}
-            {recipe.glosario.length > 0 && (
+            {recipe.tips && recipe.tips.length > 0 && (
               <Animated.View
-                entering={FadeInDown.delay(400)
+                entering={FadeInDown.delay(320)
                   .duration(700)
                   .springify()
                   .damping(12)}
-                className="space-y-4"
               >
-                <Text
-                  style={{ fontSize: hp(3.2) }}
-                  className="font-bold flex-1 text-white"
+                <SectionCard
+                  title="Tips"
+                  subtitle={`${recipe.tips.length} consejos`}
+                  isExpanded={expandedSections.tips}
+                  onToggle={() => toggleSection('tips')}
                 >
-                  Glosario:
-                </Text>
-                <View className="space-y-2" style={{ width: '100%' }}>
+                  <View style={styles.tipCard}>
+                    {recipe.tips.map((tip, index) => (
+                      <View key={index} style={styles.bulletPointContainerTips}>
+                        <View style={styles.bulletPointTips} />
+                        <Text style={styles.tipText}>{tip}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </SectionCard>
+              </Animated.View>
+            )}
+
+            {recipe.glosario.length > 0 && (
+              <Animated.View
+                entering={FadeInDown.delay(380)
+                  .duration(700)
+                  .springify()
+                  .damping(12)}
+              >
+                <SectionCard
+                  title="Glosario"
+                  subtitle={`${recipe.glosario.length} términos`}
+                  isExpanded={expandedSections.glossary}
+                  onToggle={() => toggleSection('glossary')}
+                >
+                  <View className="space-y-2" style={{ width: '100%' }}>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.scrollViewContent}
+                    >
+                      {recipe.glosario.map((term, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => handleGlossaryClick(term)}
+                          style={styles.touchableOpacity}
+                        >
+                          <View style={[styles.imageContainer]}>
+                            <Text
+                              className="text-neutral-600"
+                              style={{ fontSize: hp(1.8), color: '#007AFF' }}
+                            >
+                              {term}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </SectionCard>
+              </Animated.View>
+            )}
+
+            {recipe.media.length > 1 && (
+              <Animated.View
+                entering={FadeInDown.delay(440)
+                  .duration(700)
+                  .springify()
+                  .damping(12)}
+              >
+                <SectionCard
+                  title="Videos"
+                  subtitle={`${recipe.media.length - 1} clips`}
+                  isExpanded={expandedSections.videos}
+                  onToggle={() => toggleSection('videos')}
+                >
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.scrollViewContent}
+                    contentContainerStyle={{ paddingHorizontal: 4 }}
                   >
-                    {recipe.glosario.map((term, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        onPress={() => handleGlossaryClick(term)}
-                        style={styles.touchableOpacity}
-                      >
-                        <View style={[styles.imageContainer]}>
-                          <Text
-                            className="text-neutral-600"
-                            style={{ fontSize: hp(1.8), color: '#007AFF' }}
-                          >
-                            {term}
-                          </Text>
+                    {recipe.media.slice(1).map((url, index) => {
+                      if (!url) return null;
+
+                      const embedUrl = `https://www.youtube.com/embed/${url}`;
+                      return (
+                        <View key={index} style={styles.videoContainer}>
+                          <WebView
+                            style={styles.webView}
+                            javaScriptEnabled={true}
+                            source={{ uri: embedUrl }}
+                          />
                         </View>
-                      </TouchableOpacity>
-                    ))}
+                      );
+                    })}
                   </ScrollView>
-                </View>
-              </Animated.View>
-            )}
-
-            {/* Recipe Videos */}
-            {recipe.media.length > 1 && (
-              <Animated.View
-                entering={FadeInDown.delay(400)
-                  .duration(700)
-                  .springify()
-                  .damping(12)}
-                className="space-y-4"
-              >
-                <Text
-                  style={{ fontSize: hp(3.1) }}
-                  className="font-bold flex-1 text-white"
-                >
-                  Videos
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 10 }}
-                >
-                  {recipe.media.slice(1).map((url, index) => {
-                    // const videoId = extractVideoId(url);
-
-                    if (!url) return null;
-
-                    const embedUrl = `https://www.youtube.com/embed/${url}`;
-                    return (
-                      <View key={index} style={styles.videoContainer}>
-                        <WebView
-                          style={styles.webView}
-                          javaScriptEnabled={true}
-                          source={{ uri: embedUrl }}
-                        />
-                      </View>
-                    );
-                  })}
-                </ScrollView>
+                </SectionCard>
               </Animated.View>
             )}
           </View>
@@ -701,6 +762,97 @@ const styles = StyleSheet.create({
     fontSize: hp(2.2),
     marginTop: 12,
   },
+  quickActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  quickActionButton: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  quickActionPrimary: {
+    backgroundColor: '#fbbf24',
+  },
+  quickActionText: {
+    color: '#fff',
+    fontSize: hp(1.8),
+    fontWeight: '700',
+  },
+  quickActionPrimaryText: {
+    color: '#3a2200',
+    fontSize: hp(1.8),
+    fontWeight: '800',
+  },
+  sectionCard: {
+    backgroundColor: 'rgba(44, 18, 14, 0.58)',
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  sectionHeaderText: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: hp(2.6),
+    fontWeight: '800',
+  },
+  sectionSubtitle: {
+    color: '#fde68a',
+    fontSize: hp(1.6),
+    marginTop: 2,
+  },
+  sectionIconWrap: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 16,
+    height: 34,
+    justifyContent: 'center',
+    width: 34,
+  },
+  sectionBody: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  inlineCookButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#fbbf24',
+    borderRadius: 14,
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  inlineCookButtonText: {
+    color: '#3a2200',
+    fontSize: hp(1.7),
+    fontWeight: '800',
+  },
+  instructionsGroup: {
+    backgroundColor: 'rgba(10, 10, 10, 0.24)',
+    borderRadius: 12,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
   videoContainer: {
     width: Dimensions.get('window').width * 0.8,
     height: 200,
@@ -716,8 +868,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   tipCard: {
-    backgroundColor: 'rgba(96, 32, 32, 0.5)',
-    padding: 15,
+    backgroundColor: 'rgba(96, 32, 32, 0.32)',
+    padding: 14,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
