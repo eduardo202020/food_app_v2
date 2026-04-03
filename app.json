@@ -8,26 +8,26 @@
     "scheme": "cheff",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash-home-dark.png",
+      "image": "./assets/images/logo.png",
       "resizeMode": "cover",
       "backgroundColor": "#0B1220"
     },
     "ios": {
       "supportsTablet": true,
       "splash": {
-        "image": "./assets/images/splash-home-dark.png",
+        "image": "./assets/images/logo.png",
         "resizeMode": "cover",
         "backgroundColor": "#0B1220"
       }
     },
     "android": {
       "splash": {
-        "image": "./assets/images/splash-home-dark.png",
+        "image": "./assets/images/logo.png",
         "resizeMode": "cover",
         "backgroundColor": "#0B1220"
       },
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#FACC15"
       },
       "package": "com.jguevaral.cheff_app"
