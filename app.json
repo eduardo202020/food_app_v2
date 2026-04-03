@@ -4,7 +4,7 @@
     "slug": "cheff_app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "cheff",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -17,8 +17,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#000"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#000000"
       },
       "package": "com.jguevaral.cheff_app"
     },
