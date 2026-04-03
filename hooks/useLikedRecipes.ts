@@ -1,34 +1,53 @@
 import { useState, useEffect } from "react";
+import { useSQLiteContext } from "expo-sqlite";
 import {
-  getLikedRecipes,
-  saveLikedRecipe,
-  removeLikedRecipe,
+  getLikedRecipeSlugs,
+  migrateLegacyLikedRecipes,
+  removeLikedRecipeSlug,
+  saveLikedRecipeSlug,
 } from "@/utils/storageUtils";
+import { getRecipesByNames } from "@/lib/recipes-db";
 
 export const useLikedRecipes = () => {
-  const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
+  const db = useSQLiteContext();
+  const [likedRecipeSlugs, setLikedRecipeSlugs] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchLikedRecipes = async () => {
-      const recipes = await getLikedRecipes();
-      setLikedRecipes(recipes);
+      const migratedSlugs = await migrateLegacyLikedRecipes(async (names) => {
+        const recipes = await getRecipesByNames(db, names);
+        return recipes.map((recipe) => recipe.slug);
+      });
+
+      if (migratedSlugs.length > 0) {
+        setLikedRecipeSlugs(migratedSlugs);
+        return;
+      }
+
+      const recipes = await getLikedRecipeSlugs();
+      setLikedRecipeSlugs(recipes);
     };
 
     fetchLikedRecipes();
-  }, []);
+  }, [db]);
 
-  const likeRecipe = async (recipeTitle: string) => {
-    await saveLikedRecipe(recipeTitle);
-    setLikedRecipes([...likedRecipes, recipeTitle]);
+  const likeRecipe = async (recipeSlug: string) => {
+    await saveLikedRecipeSlug(recipeSlug);
+    setLikedRecipeSlugs((currentSlugs) =>
+      currentSlugs.includes(recipeSlug)
+        ? currentSlugs
+        : [...currentSlugs, recipeSlug]
+    );
   };
 
-  const unlikeRecipe = async (recipeTitle: string) => {
-    await removeLikedRecipe(recipeTitle);
-    setLikedRecipes(likedRecipes.filter((title) => title !== recipeTitle));
+  const unlikeRecipe = async (recipeSlug: string) => {
+    await removeLikedRecipeSlug(recipeSlug);
+    setLikedRecipeSlugs((currentSlugs) =>
+      currentSlugs.filter((storedSlug) => storedSlug !== recipeSlug)
+    );
   };
-
   return {
-    likedRecipes,
+    likedRecipeSlugs,
     likeRecipe,
     unlikeRecipe,
   };

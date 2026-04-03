@@ -7,6 +7,7 @@ import {
   ImageBackground,
   StatusBar,
   FlatList,
+  Linking,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import TrendingRecipes from '@/components/TrendingRecipes';
@@ -24,6 +25,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 const HomeScreen = () => {
   const db = useSQLiteContext();
+  const whatsappUrl = 'https://wa.me/51991004126';
 
   // Estado para la categoría activa y las recetas filtradas
   const [activeCategory, setActiveCategory] = useState<string>('Todo');
@@ -88,6 +90,14 @@ const HomeScreen = () => {
     prepareScreen();
   }, []);
 
+  const handleWhatsAppPress = async () => {
+    const supported = await Linking.canOpenURL(whatsappUrl);
+
+    if (supported) {
+      await Linking.openURL(whatsappUrl);
+    }
+  };
+
   return (
     <ImageBackground
       source={require('@/assets/images/madera4.jpg')}
@@ -97,7 +107,9 @@ const HomeScreen = () => {
       <StatusBar barStyle={'dark-content'} />
       <SafeAreaView>
         <View className="pb-4 flex-row justify-between items-center mx-4 border-solid border-b-stone-900 ">
-          <FontAwesome6 name="bars-staggered" size={24} color="white" />
+          <TouchableOpacity onPress={handleWhatsAppPress}>
+            <FontAwesome name="whatsapp" size={28} color="#25D366" />
+          </TouchableOpacity>
           <Text className="text-white text-3xl font-bold">
             <Text style={styles.text}>E</Text>l{' '}
             <Text style={styles.text}>G</Text>ran{' '}

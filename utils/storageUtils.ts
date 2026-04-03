@@ -1,27 +1,58 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LIKED_RECIPES_KEY = "likedRecipes";
+const LEGACY_LIKED_RECIPES_KEY = "likedRecipes";
+const LIKED_RECIPE_SLUGS_KEY = "likedRecipeSlugs";
 
-export const getLikedRecipes = async (): Promise<string[]> => {
-  const jsonValue = await AsyncStorage.getItem(LIKED_RECIPES_KEY);
+const setLikedRecipeSlugs = async (slugs: string[]) => {
+  await AsyncStorage.setItem(
+    LIKED_RECIPE_SLUGS_KEY,
+    JSON.stringify([...new Set(slugs)])
+  );
+};
+
+export const getLikedRecipeSlugs = async (): Promise<string[]> => {
+  const jsonValue = await AsyncStorage.getItem(LIKED_RECIPE_SLUGS_KEY);
   return jsonValue != null ? JSON.parse(jsonValue) : [];
 };
 
-export const saveLikedRecipe = async (recipeTitle: string) => {
-  const likedRecipes = await getLikedRecipes();
-  if (!likedRecipes.includes(recipeTitle)) {
-    likedRecipes.push(recipeTitle);
-    await AsyncStorage.setItem(LIKED_RECIPES_KEY, JSON.stringify(likedRecipes));
+export const migrateLegacyLikedRecipes = async (
+  mapNamesToSlugs: (recipeNames: string[]) => Promise<string[]>
+) => {
+  const legacyJsonValue = await AsyncStorage.getItem(LEGACY_LIKED_RECIPES_KEY);
+  const currentSlugs = await getLikedRecipeSlugs();
+
+  if (!legacyJsonValue) {
+    return currentSlugs;
+  }
+
+  const legacyRecipeNames = JSON.parse(legacyJsonValue) as string[];
+  const migratedSlugs = await mapNamesToSlugs(legacyRecipeNames);
+  const mergedSlugs = [...new Set([...currentSlugs, ...migratedSlugs])];
+
+  await setLikedRecipeSlugs(mergedSlugs);
+  await AsyncStorage.removeItem(LEGACY_LIKED_RECIPES_KEY);
+
+  return mergedSlugs;
+};
+
+export const saveLikedRecipeSlug = async (recipeSlug: string) => {
+  const likedRecipeSlugs = await getLikedRecipeSlugs();
+  if (!likedRecipeSlugs.includes(recipeSlug)) {
+    likedRecipeSlugs.push(recipeSlug);
+    await setLikedRecipeSlugs(likedRecipeSlugs);
   }
 };
 
-export const removeLikedRecipe = async (recipeTitle: string) => {
-  let likedRecipes = await getLikedRecipes();
-  likedRecipes = likedRecipes.filter((title) => title !== recipeTitle);
-  await AsyncStorage.setItem(LIKED_RECIPES_KEY, JSON.stringify(likedRecipes));
+export const removeLikedRecipeSlug = async (recipeSlug: string) => {
+  const likedRecipeSlugs = await getLikedRecipeSlugs();
+  await setLikedRecipeSlugs(
+    likedRecipeSlugs.filter((storedSlug) => storedSlug !== recipeSlug)
+  );
 };
 
-export const isRecipeLiked = async (recipeTitle: string): Promise<boolean> => {
-  const likedRecipes = await getLikedRecipes();
-  return likedRecipes.includes(recipeTitle);
+export const isRecipeSlugLiked = async (
+  recipeSlug: string
+): Promise<boolean> => {
+  const likedRecipeSlugs = await getLikedRecipeSlugs();
+  return likedRecipeSlugs.includes(recipeSlug);
 };

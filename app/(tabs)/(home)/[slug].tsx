@@ -4,7 +4,6 @@ import {
   View,
   Text,
   ScrollView,
-  SafeAreaView,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ChevronLeftIcon,
   BoltIcon,
@@ -168,7 +168,7 @@ const RecipeDetail = () => {
 
   // manejo de favoritos
   const { likeRecipe, unlikeRecipe } = useLikedRecipes();
-  const isInitiallyLiked = useIsRecipeLiked(recipe?.nombre_receta ?? '');
+  const isInitiallyLiked = useIsRecipeLiked(recipe?.slug ?? '');
 
   // Estado para manejar si la receta está en favoritos
   const [isLiked, setIsLiked] = useState(false);
@@ -184,9 +184,9 @@ const RecipeDetail = () => {
     }
 
     if (isLiked) {
-      unlikeRecipe(recipe.nombre_receta);
+      unlikeRecipe(recipe.slug);
     } else {
-      likeRecipe(recipe.nombre_receta);
+      likeRecipe(recipe.slug);
     }
     setIsLiked(!isLiked); // Actualiza el estado local inmediatamente
   };

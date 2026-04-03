@@ -1,6 +1,4 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-
-import { recipeData } from '@/data/recetario';
 import type { Recipe } from '@/types/recipe';
 
 type RecipeRow = {
@@ -35,16 +33,7 @@ const RECIPE_SELECT = `
   FROM recipes
 `;
 
-const RECIPES_DB_VERSION = 2;
-
-const toRecipeRow = (recipe: Recipe) => ({
-  ...recipe,
-  media: JSON.stringify(recipe.media),
-  ingredientes: JSON.stringify(recipe.ingredientes),
-  preparacion: JSON.stringify(recipe.preparacion),
-  tips: JSON.stringify(recipe.tips),
-  glosario: JSON.stringify(recipe.glosario),
-});
+const RECIPES_DB_VERSION = 3;
 
 const parseRecipeRow = (row: RecipeRow): Recipe => {
   const { id: _id, ...recipeRow } = row;
@@ -69,9 +58,7 @@ export const initializeRecipesDatabase = async (db: SQLiteDatabase) => {
 
   if (currentVersion < RECIPES_DB_VERSION) {
     await db.execAsync(`
-      DROP TABLE IF EXISTS recipes;
-
-      CREATE TABLE recipes (
+      CREATE TABLE IF NOT EXISTS recipes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         slug TEXT NOT NULL,
         episodio INTEGER NOT NULL,
@@ -97,47 +84,6 @@ export const initializeRecipesDatabase = async (db: SQLiteDatabase) => {
       PRAGMA user_version = ${RECIPES_DB_VERSION};
     `);
   }
-
-  const result = await db.getFirstAsync<{ total: number }>(
-    'SELECT COUNT(*) as total FROM recipes'
-  );
-
-  if ((result?.total ?? 0) > 0) {
-    return;
-  }
-
-  await db.withTransactionAsync(async () => {
-    for (const recipe of recipeData) {
-      const row = toRecipeRow(recipe);
-
-      await db.runAsync(
-        `INSERT INTO recipes (
-          slug,
-          episodio,
-          nombre_receta,
-          tipo,
-          media,
-          ingredientes,
-          preparacion,
-          tips,
-          temporada,
-          nivel_complejidad,
-          glosario
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        row.slug,
-        row.episodio,
-        row.nombre_receta,
-        row.tipo,
-        row.media,
-        row.ingredientes,
-        row.preparacion,
-        row.tips,
-        row.temporada,
-        row.nivel_complejidad,
-        row.glosario
-      );
-    }
-  });
 };
 
 export const getRecipes = async (
@@ -233,5 +179,26 @@ export const getRecipesByNames = async (
     .map((recipeName) =>
       recipes.find((recipe) => recipe.nombre_receta === recipeName)
     )
+    .filter((recipe): recipe is Recipe => recipe !== undefined);
+};
+
+export const getRecipesBySlugs = async (
+  db: SQLiteDatabase,
+  recipeSlugs: string[]
+) => {
+  if (recipeSlugs.length === 0) {
+    return [];
+  }
+
+  const placeholders = recipeSlugs.map(() => '?').join(', ');
+  const rows = await db.getAllAsync<RecipeRow>(
+    `${RECIPE_SELECT} WHERE slug IN (${placeholders})`,
+    ...recipeSlugs
+  );
+
+  const recipes = rows.map(parseRecipeRow);
+
+  return recipeSlugs
+    .map((recipeSlug) => recipes.find((recipe) => recipe.slug === recipeSlug))
     .filter((recipe): recipe is Recipe => recipe !== undefined);
 };

@@ -45,7 +45,7 @@ const TrendingRecipes = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Temporadas v2:</Text>
+      <Text style={styles.title}>Temporadas:</Text>
 
       <Carousel
         data={temporadas}

@@ -31,6 +31,7 @@ export default function RootLayout() {
   return (
     <SQLiteProvider
       databaseName="recipes.db"
+      assetSource={{ assetId: require('../assets/db/recipes.db') }}
       onInit={initializeRecipesDatabase}
     >
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

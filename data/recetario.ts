@@ -1,7 +1,5 @@
 import type { Recipe } from '@/types/recipe';
 
-export type recipeProps = Recipe;
-
 export const recipeData: Recipe[] = [
   {
     episodio: 1,
