@@ -4,30 +4,30 @@
     "slug": "cheff_app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/app-icon.png",
     "scheme": "cheff",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FACC15"
+      "image": "./assets/images/splash-home-dark.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0B1220"
     },
     "ios": {
       "supportsTablet": true,
       "splash": {
-        "image": "./assets/images/icon.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#FACC15"
+        "image": "./assets/images/splash-home-dark.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#0B1220"
       }
     },
     "android": {
       "splash": {
-        "image": "./assets/images/icon.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#FACC15"
+        "image": "./assets/images/splash-home-dark.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#0B1220"
       },
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FACC15"
       },
       "package": "com.jguevaral.cheff_app"
