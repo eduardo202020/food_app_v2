@@ -205,24 +205,30 @@ export const getRecipesBySlugs = async (
 
 export const getRelatedRecipes = async (
   db: SQLiteDatabase,
-  currentRecipe: Pick<Recipe, 'slug' | 'tipo' | 'temporada'>,
+  currentRecipe: Pick<
+    Recipe,
+    'slug' | 'tipo' | 'temporada' | 'nivel_complejidad'
+  >,
   limit = 6
 ) => {
   const rows = await db.getAllAsync<RecipeRow>(
     `${RECIPE_SELECT}
      WHERE slug != ?
-       AND (tipo = ? OR temporada = ?)
+       AND (
+         tipo = ?
+         OR nivel_complejidad = ?
+       )
      ORDER BY
        CASE WHEN tipo = ? THEN 0 ELSE 1 END,
-       CASE WHEN temporada = ? THEN 0 ELSE 1 END,
+       CASE WHEN nivel_complejidad = ? THEN 0 ELSE 1 END,
        temporada DESC,
        episodio ASC
      LIMIT ?`,
     currentRecipe.slug,
     currentRecipe.tipo,
-    currentRecipe.temporada,
+    currentRecipe.nivel_complejidad,
     currentRecipe.tipo,
-    currentRecipe.temporada,
+    currentRecipe.nivel_complejidad,
     limit
   );
 
