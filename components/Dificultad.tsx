@@ -7,10 +7,10 @@ import {
 } from "react-native";
 import React from "react";
 import {
-  widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 interface dificultadesProps {
   tipo: string;
@@ -30,6 +30,8 @@ export default function Dificultades({
   activeDificultad: string;
   handleChangeDificultad: (category: string) => void;
 }) {
+  const { theme } = useAppTheme();
+
   return (
     <Animated.View entering={FadeInDown.duration(500).springify()}>
       <ScrollView
@@ -39,7 +41,13 @@ export default function Dificultades({
       >
         {dificultades.map((dif: dificultadesProps, index: number) => {
           let isActive = dif.tipo === activeDificultad;
-          let backgroundColor = isActive ? "#FF6347" : "#E0E0E0"; // Ejemplo de colores (rojo tomate y gris claro)
+          let backgroundColor = isActive
+            ? "rgba(250, 204, 21, 0.92)"
+            : theme.mode === "dark"
+              ? "rgba(255,255,255,0.10)"
+              : "rgba(255,255,255,0.92)";
+          let textColor = isActive ? theme.accentTextOn : theme.text;
+          let borderColor = isActive ? "rgba(250, 204, 21, 0.35)" : theme.border;
 
           return (
             <TouchableOpacity
@@ -52,12 +60,14 @@ export default function Dificultades({
                   styles.imageContainer,
                   {
                     backgroundColor: backgroundColor,
+                    borderColor,
+                    shadowColor: theme.shadow,
                   },
                 ]}
               >
                 <Text
                   className="text-neutral-600"
-                  style={{ fontSize: hp(1.8), color: "#4c4c4c" }}
+                  style={{ fontSize: hp(1.8), color: textColor, fontWeight: "700" }}
                 >
                   {dif.tipo}
                 </Text>
@@ -75,8 +85,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingRight: 20,
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: wp(100),
+    gap: 10,
   },
   touchableOpacity: {
     alignItems: "center",
@@ -87,6 +96,13 @@ const styles = StyleSheet.create({
     borderRadius: 50, // Hace que la vista sea redonda
     padding: 6,
     paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.10)",
+    shadowColor: "#000",
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
   },
   image: {
     width: hp(6),

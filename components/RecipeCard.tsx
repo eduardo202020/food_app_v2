@@ -4,8 +4,9 @@ import { Image } from "expo-image";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import type { Recipe } from "@/types/recipe";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
-export const RecipeCard = ({
+function RecipeCardInner({
   item,
   index,
   compact = false,
@@ -13,24 +14,40 @@ export const RecipeCard = ({
   item: Recipe;
   index: number;
   compact?: boolean;
-}) => {
+}) {
   const router = useRouter();
+  const { theme } = useAppTheme();
+  const entering =
+    index < 12
+      ? FadeInDown.delay(index * 90).duration(520).springify().damping(12)
+      : undefined;
 
   return (
     <Animated.View
       style={compact && styles.compactColumn}
-      entering={FadeInDown.delay(index * 100)
-        .duration(600)
-        .springify()
-        .damping(12)}
+      entering={entering}
     >
       <TouchableOpacity
-        style={[styles.recipeCard, compact && styles.recipeCardCompact]}
+        style={[
+          styles.recipeCard,
+          {
+            backgroundColor: theme.surfaceStrong,
+            borderColor: theme.border,
+            shadowColor: theme.shadow,
+          },
+          compact && styles.recipeCardCompact,
+        ]}
         onPress={() => {
           router.push(`/(home)/${item.slug}`);
         }}
       >
-        <View style={[styles.imageFrame, compact && styles.imageFrameCompact]}>
+        <View
+          style={[
+            styles.imageFrame,
+            { backgroundColor: theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(15,23,42,0.06)" },
+            compact && styles.imageFrameCompact,
+          ]}
+        >
           <Image
             cachePolicy="disk"
             source={{ uri: item.media[0] }}
@@ -43,7 +60,11 @@ export const RecipeCard = ({
         </View>
         <Text
           numberOfLines={compact ? 2 : 3}
-          style={[styles.recipeTitle, compact && styles.recipeTitleCompact]}
+          style={[
+            styles.recipeTitle,
+            { color: theme.text },
+            compact && styles.recipeTitleCompact,
+          ]}
         >
           {item.nombre_receta}
         </Text>
@@ -51,14 +72,28 @@ export const RecipeCard = ({
           <View
             style={[styles.containerText, compact && styles.containerTextCompact]}
           >
-            <Text style={[styles.recipeTipo, compact && styles.recipeMetaCompact]}>
-              <Text style={{ color: "yellow", fontWeight: "bold" }}>Tipo: </Text>
+            <Text
+              style={[
+                styles.recipeTipo,
+                { color: theme.textMuted },
+                compact && styles.recipeMetaCompact,
+              ]}
+            >
+              <Text style={{ color: theme.accent, fontWeight: "bold" }}>
+                Tipo:{' '}
+              </Text>
               {item.tipo}
             </Text>
             <Text
-              style={[styles.recipeDificultad, compact && styles.recipeMetaCompact]}
+              style={[
+                styles.recipeDificultad,
+                { color: theme.textMuted },
+                compact && styles.recipeMetaCompact,
+              ]}
             >
-              <Text style={{ color: "yellow", fontWeight: "bold" }}>Ep: </Text>
+              <Text style={{ color: theme.accent, fontWeight: "bold" }}>
+                Ep:{' '}
+              </Text>
               {item.episodio}
             </Text>
           </View>
@@ -66,7 +101,9 @@ export const RecipeCard = ({
       </TouchableOpacity>
     </Animated.View>
   );
-};
+}
+
+export const RecipeCard = RecipeCardInner;
 
 
 const styles = StyleSheet.create({
@@ -92,13 +129,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderRadius: 16,
-    backgroundColor: "rgba(96, 32, 32, 0.5)",
     padding: 16,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 10,
     },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 7,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
   recipeCardCompact: {
     minHeight: 152,
@@ -119,7 +160,7 @@ const styles = StyleSheet.create({
   recipeImage: {
     width: "100%",
     height: 150,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#0b1220",
   },
   recipeImageCompact: {
     height: 118,

@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
   StatusBar,
   FlatList,
   Linking,
@@ -13,17 +12,20 @@ import React, { useEffect, useState } from 'react';
 import TrendingRecipes from '@/components/TrendingRecipes';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSQLiteContext } from 'expo-sqlite';
-import { FontAwesome, FontAwesome6 } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import Categorias from '@/components/Categorias';
 import Dificultades from '@/components/Dificultad';
 
 import { RecipeCard } from '@/components/RecipeCard';
 import { getRecipes } from '@/lib/recipes-db';
 import type { Recipe } from '@/types/recipe';
+import { AppBackground } from '@/components/AppBackground';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 const HomeScreen = () => {
   const db = useSQLiteContext();
-  const whatsappUrl = 'https://wa.me/51991004126';
+  const portfolioUrl = 'https://portafolio-tech-eight.vercel.app/';
+  const { mode, theme, toggleMode } = useAppTheme();
 
   // Estado para la categoría activa y las recetas filtradas
   const [activeCategory, setActiveCategory] = useState<string>('Todo');
@@ -75,33 +77,45 @@ const HomeScreen = () => {
     };
   }, [activeCategory, activeDificultad, db]);
 
-  const handleWhatsAppPress = async () => {
-    const supported = await Linking.canOpenURL(whatsappUrl);
+  const handlePortfolioPress = async () => {
+    const supported = await Linking.canOpenURL(portfolioUrl);
 
     if (supported) {
-      await Linking.openURL(whatsappUrl);
+      await Linking.openURL(portfolioUrl);
     }
   };
 
   return (
-    <ImageBackground
-      source={require('@/assets/images/madera4.jpg')}
-      style={{ flex: 1 }}
-      width={100}
-    >
-      <StatusBar barStyle={'light-content'} />
-      <SafeAreaView>
-        <View className="pb-4 flex-row justify-between items-center mx-4 border-solid border-b-stone-900 ">
-          <TouchableOpacity onPress={handleWhatsAppPress}>
+    <AppBackground>
+      <StatusBar barStyle={theme.statusBarStyle} />
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          className="flex-row justify-between items-center mx-4"
+          style={[
+            styles.headerSurface,
+            {
+              backgroundColor:
+                theme.mode === 'light' ? 'rgba(255,255,255,0.92)' : theme.surface,
+              shadowColor: theme.shadow,
+            },
+          ]}
+        >
+          <TouchableOpacity onPress={handlePortfolioPress}>
             <FontAwesome name="whatsapp" size={28} color="#25D366" />
           </TouchableOpacity>
-          <Text className="text-white text-3xl font-bold">
-            <Text style={styles.text}>E</Text>l{' '}
-            <Text style={styles.text}>G</Text>ran{' '}
-            <Text style={styles.text}>C</Text>hef
+          <Text
+            style={[styles.title, { color: theme.text }]}
+          >
+            <Text style={[styles.titleAccent, { color: theme.accent }]}>E</Text>l{' '}
+            <Text style={[styles.titleAccent, { color: theme.accent }]}>G</Text>ran{' '}
+            <Text style={[styles.titleAccent, { color: theme.accent }]}>C</Text>hef
           </Text>
-          <TouchableOpacity>
-            <FontAwesome name="search" size={24} color="white" />
+          <TouchableOpacity onPress={toggleMode} accessibilityRole="button">
+            <Ionicons
+              name={mode === 'dark' ? 'sunny' : 'moon'}
+              size={24}
+              color={theme.text}
+            />
           </TouchableOpacity>
         </View>
 
@@ -113,11 +127,13 @@ const HomeScreen = () => {
               index={index + item.episodio + item.temporada}
             />
           )}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
           keyExtractor={(item) =>
             item.nombre_receta + item.temporada + item.episodio
           }
           ListHeaderComponent={
-            <View>
+            <View style={styles.listHeader}>
               {/* Recetas filtradas */}
               <TrendingRecipes />
 
@@ -143,7 +159,7 @@ const HomeScreen = () => {
           }
         />
       </SafeAreaView>
-    </ImageBackground>
+    </AppBackground>
   );
 };
 
@@ -151,10 +167,39 @@ export default HomeScreen;
 
 // crea los estilos
 const styles = StyleSheet.create({
-  text: {
-    color: 'yellow',
-    fontSize: 30,
-    fontWeight: 'bold',
+  title: {
+    fontSize: 32,
+    fontWeight: '900',
+    lineHeight: 36,
+    includeFontPadding: false,
+  },
+  titleAccent: {
+    fontSize: 32,
+    fontWeight: '900',
+    lineHeight: 36,
+    includeFontPadding: false,
+  },
+  headerSurface: {
+    backgroundColor: 'rgba(17, 24, 39, 0.55)',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 6,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 8,
+    borderWidth: 0,
+  },
+  listHeader: {
+    paddingTop: 10,
+    paddingBottom: 6,
+    gap: 10,
+  },
+  listContent: {
+    paddingBottom: 110,
   },
   loadingContainer: {
     alignItems: 'center',

@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  ImageBackground,
   StyleSheet,
   FlatList,
   ScrollView,
@@ -20,6 +19,8 @@ import { getRecipes } from "@/lib/recipes-db";
 import type { Recipe } from "@/types/recipe";
 import { useRouter } from "expo-router";
 import { temporadas } from "@/data/temporadas";
+import { AppBackground } from "@/components/AppBackground";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 const difficultyOptions = ["Todo", "Fácil", "Intermedio", "Avanzado", "Desafiante"];
 
@@ -31,19 +32,36 @@ const FilterChip = ({
   label: string;
   active: boolean;
   onPress: () => void;
-}) => (
-  <TouchableOpacity
-    onPress={onPress}
-    style={[styles.filterChip, active && styles.filterChipActive]}
-  >
-    <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
+}) => {
+  const { theme } = useAppTheme();
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.filterChip,
+        {
+          backgroundColor: active ? theme.accent : theme.surface,
+          borderColor: active ? 'rgba(250, 204, 21, 0.35)' : theme.border,
+          shadowColor: theme.shadow,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.filterChipText,
+          { color: active ? theme.accentTextOn : theme.text },
+        ]}
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 const SearchScreen = () => {
   const db = useSQLiteContext();
+  const { theme } = useAppTheme();
   const router = useRouter();
 
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
@@ -125,19 +143,26 @@ const SearchScreen = () => {
   );
 
   return (
-    <ImageBackground
-      source={require("@/assets/images/madera4.jpg")}
-      style={{ flex: 1 }}
-      width={100}
-    >
+    <AppBackground>
       <SafeAreaView className=" flex-1 pt-4">
-        <View className="mx-4 pl-2 mb-3 flex-row justify-between items-center border border-neutral-500 rounded-full ">
+        <View
+          className="mx-4 pl-2 mb-3 flex-row justify-between items-center border border-neutral-500 rounded-full "
+          style={[
+            styles.searchSurface,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+              shadowColor: theme.shadow,
+            },
+          ]}
+        >
           <TextInput
             value={searchText}
             onChangeText={setSearchText}
             placeholder="Buscar Recetas"
-            placeholderTextColor={"lightgray"}
+            placeholderTextColor={theme.textMuted}
             className="pb-1 pl-6 text-base font-semibold text-yellow-500 tracking-wider flex-1 "
+            style={{ color: theme.text }}
           />
           <TouchableOpacity
             onPress={() => {
@@ -148,16 +173,24 @@ const SearchScreen = () => {
 
               router.push("/(home)");
             }}
-            className="rounded-full p-3 m-1 bg-neutral-500"
+            style={[
+              styles.clearButton,
+              {
+                backgroundColor:
+                  theme.mode === "dark" ? "rgba(255,255,255,0.14)" : "rgba(15,23,42,0.06)",
+              },
+            ]}
           >
-            <XMarkIcon size="25" color="white" />
+            <XMarkIcon size="25" color={theme.text} />
           </TouchableOpacity>
         </View>
 
         {isLoadingRecipes ? (
           <View style={styles.logoContent}>
             <ActivityIndicator color="#facc15" size="large" />
-            <Text style={styles.searchingText}>Cargando recetas...</Text>
+            <Text style={[styles.searchingText, { color: theme.textMuted }]}>
+              Cargando recetas...
+            </Text>
           </View>
         ) : null}
 
@@ -180,7 +213,9 @@ const SearchScreen = () => {
             ListHeaderComponent={
               <View style={styles.resultsHeader}>
                 <View style={styles.filtersBlock}>
-                  <Text style={styles.filtersTitle}>Categorias</Text>
+                  <Text style={[styles.filtersTitle, { color: theme.textMuted }]}>
+                    Categorias
+                  </Text>
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -196,7 +231,9 @@ const SearchScreen = () => {
                     ))}
                   </ScrollView>
 
-                  <Text style={styles.filtersTitle}>Temporadas</Text>
+                  <Text style={[styles.filtersTitle, { color: theme.textMuted }]}>
+                    Temporadas
+                  </Text>
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -217,7 +254,9 @@ const SearchScreen = () => {
                     ))}
                   </ScrollView>
 
-                  <Text style={styles.filtersTitle}>Dificultad</Text>
+                  <Text style={[styles.filtersTitle, { color: theme.textMuted }]}>
+                    Dificultad
+                  </Text>
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -233,11 +272,16 @@ const SearchScreen = () => {
                     ))}
                   </ScrollView>
                 </View>
-                <Text className="text-white font-semibold ml-1 ">
+                <Text
+                  className="font-semibold ml-1 "
+                  style={{ color: theme.text }}
+                >
                   {searchText ? `Resultados (${results.length})` : "Todas las recetas"}
                 </Text>
                 {isSearching ? (
-                  <Text style={styles.filteringText}>Filtrando...</Text>
+                  <Text style={[styles.filteringText, { color: theme.textMuted }]}>
+                    Filtrando...
+                  </Text>
                 ) : null}
               </View>
             }
@@ -247,7 +291,7 @@ const SearchScreen = () => {
                   source={require("@/assets/images/logo.png")}
                   className="h-52 w-52"
                 />
-                <Text style={styles.emptyText}>
+                <Text style={[styles.emptyText, { color: theme.text }]}>
                   No encontramos recetas con ese nombre.
                 </Text>
               </View>
@@ -255,12 +299,21 @@ const SearchScreen = () => {
           />
         ) : null}
       </SafeAreaView>
-    </ImageBackground>
+    </AppBackground>
   );
 };
 
 // crea los estilos
 const styles = StyleSheet.create({
+  searchSurface: {
+    backgroundColor: "rgba(17, 24, 39, 0.55)",
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    shadowColor: "#000",
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 7,
+  },
   logoContent: {
     display: "flex",
     justifyContent: "center",
@@ -268,7 +321,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   searchingText: {
-    color: "white",
     fontSize: 16,
     marginTop: 12,
   },
@@ -280,7 +332,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   filtersTitle: {
-    color: "#fef3c7",
     fontSize: 13,
     fontWeight: "700",
     marginBottom: 6,
@@ -290,30 +341,26 @@ const styles = StyleSheet.create({
   filterRow: {
     paddingHorizontal: 2,
     paddingRight: 10,
+    paddingBottom: 18,
+    paddingTop: 4,
   },
   filterChip: {
-    backgroundColor: "rgba(255,255,255,0.14)",
-    borderColor: "rgba(255,255,255,0.16)",
     borderRadius: 999,
     borderWidth: 1,
     marginRight: 8,
+    marginBottom: 2,
     paddingHorizontal: 12,
     paddingVertical: 8,
-  },
-  filterChipActive: {
-    backgroundColor: "#fbbf24",
-    borderColor: "#fbbf24",
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
   },
   filterChipText: {
-    color: "white",
     fontSize: 13,
     fontWeight: "600",
   },
-  filterChipTextActive: {
-    color: "#3a2200",
-  },
   filteringText: {
-    color: "#fde68a",
     fontSize: 12,
     marginLeft: 6,
     marginTop: 6,
@@ -333,9 +380,13 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   emptyText: {
-    color: "white",
     fontSize: 16,
     marginTop: 8,
+  },
+  clearButton: {
+    borderRadius: 999,
+    padding: 12,
+    margin: 4,
   },
 });
 

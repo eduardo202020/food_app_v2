@@ -8,7 +8,6 @@ import {
   StyleSheet,
   Dimensions,
   Modal,
-  ImageBackground,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -24,6 +23,8 @@ import {
 } from 'react-native-heroicons/outline';
 
 import { HeartIcon } from 'react-native-heroicons/solid';
+import { AppBackground } from '@/components/AppBackground';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 interface RecipeStep {
   title: string;
@@ -42,6 +43,37 @@ const formatTimer = (seconds: number) => {
   return `${mins}:${secs}`;
 };
 
+function getYouTubeVideoId(input: string): string | null {
+  if (!input) return null;
+
+  const trimmed = input.trim();
+
+  // Already a YouTube id
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // YouTube thumbnail URL: https://img.youtube.com/vi/<id>/...
+  const thumbMatch = trimmed.match(/img\.youtube\.com\/vi\/([a-zA-Z0-9_-]{11})\//);
+  if (thumbMatch?.[1]) return thumbMatch[1];
+
+  // youtu.be/<id>
+  const shortMatch = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (shortMatch?.[1]) return shortMatch[1];
+
+  // youtube.com/watch?v=<id>
+  const watchMatch = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if (watchMatch?.[1]) return watchMatch[1];
+
+  // youtube.com/embed/<id> or /shorts/<id>
+  const pathMatch = trimmed.match(
+    /youtube\.com\/(embed|shorts)\/([a-zA-Z0-9_-]{11})/
+  );
+  if (pathMatch?.[2]) return pathMatch[2];
+
+  return null;
+}
+
 import { useIsRecipeLiked } from '@/hooks/useIsRecipeLiked';
 import { useLikedRecipes } from '@/hooks/useLikedRecipes';
 
@@ -53,7 +85,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import { WebView } from 'react-native-webview';
+import YoutubePlayer from 'react-native-youtube-iframe';
 
 import { glosario } from '@/data/glosario';
 import { getRecipeBySlug, getRelatedRecipes } from '@/lib/recipes-db';
@@ -95,18 +127,53 @@ const SectionCard = ({
   onToggle: () => void;
   children: React.ReactNode;
 }) => {
+  const { theme } = useAppTheme();
+
   return (
-    <View style={styles.sectionCard}>
-      <TouchableOpacity onPress={onToggle} style={styles.sectionHeader}>
+    <View
+      style={[
+        styles.sectionCard,
+        {
+          backgroundColor: theme.surfaceStrong,
+          borderColor: theme.border,
+          shadowColor: theme.shadow,
+        },
+      ]}
+    >
+      <TouchableOpacity
+        onPress={onToggle}
+        style={[
+          styles.sectionHeader,
+          {
+            borderBottomColor: theme.border,
+            borderBottomWidth: isExpanded ? 1 : 0,
+          },
+        ]}
+      >
         <View style={styles.sectionHeaderText}>
-          <Text style={styles.sectionTitle}>{title}</Text>
-          {subtitle ? <Text style={styles.sectionSubtitle}>{subtitle}</Text> : null}
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{title}</Text>
+          {subtitle ? (
+            <Text style={[styles.sectionSubtitle, { color: theme.textMuted }]}>
+              {subtitle}
+            </Text>
+          ) : null}
         </View>
-        <View style={styles.sectionIconWrap}>
+        <View
+          style={[
+            styles.sectionIconWrap,
+            {
+              backgroundColor:
+                theme.mode === 'dark'
+                  ? 'rgba(255,255,255,0.08)'
+                  : 'rgba(15,23,42,0.06)',
+              borderColor: theme.border,
+            },
+          ]}
+        >
           {isExpanded ? (
-            <ChevronUpIcon size={hp(2.4)} color="#fbbf24" />
+            <ChevronUpIcon size={hp(2.4)} color={theme.accent} />
           ) : (
-            <ChevronDownIcon size={hp(2.4)} color="#fbbf24" />
+            <ChevronDownIcon size={hp(2.4)} color={theme.accent} />
           )}
         </View>
       </TouchableOpacity>
@@ -117,6 +184,7 @@ const SectionCard = ({
 
 const RecipeDetail = () => {
   const db = useSQLiteContext();
+  const { theme } = useAppTheme();
   const { slug } = useLocalSearchParams();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(true);
@@ -307,46 +375,37 @@ const RecipeDetail = () => {
 
   if (isLoadingRecipe) {
     return (
-      <ImageBackground
-        source={require('@/assets/images/madera4.jpg')}
-        style={{ flex: 1 }}
-        width={100}
-      >
+      <AppBackground>
         <SafeAreaView style={styles.loadingContainer}>
           <ActivityIndicator color="#facc15" size="large" />
           <Text style={styles.loadingText}>Cargando receta...</Text>
         </SafeAreaView>
-      </ImageBackground>
+      </AppBackground>
     );
   }
 
   if (!recipe) {
     return (
-      <ImageBackground
-        source={require('@/assets/images/madera4.jpg')}
-        style={{ flex: 1 }}
-        width={100}
-      >
+      <AppBackground>
         <SafeAreaView style={styles.loadingContainer}>
           <Text style={styles.loadingText}>No se encontraron recetas.</Text>
         </SafeAreaView>
-      </ImageBackground>
+      </AppBackground>
     );
   }
 
   return (
-    <ImageBackground
-      source={require('@/assets/images/madera4.jpg')}
-      style={{ flex: 1 }}
-      width={100}
-    >
+    <AppBackground>
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           // className="bg-white flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 30 }}
         >
-          <StatusBar backgroundColor={colorStatusBar} />
+          <StatusBar
+            backgroundColor={colorStatusBar}
+            style={theme.mode === 'dark' ? 'light' : 'dark'}
+          />
 
           {/* Meal image */}
           <View className="flex-row justify-center" style={{ flex: 1 }}>
@@ -403,8 +462,8 @@ const RecipeDetail = () => {
               className="space-y-2"
             >
               <Text
-                style={{ fontSize: hp(3.6) }}
-                className="font-bold flex-1 text-white"
+                style={{ fontSize: hp(3.6), color: theme.text }}
+                className="font-bold flex-1"
               >
                 {recipe.nombre_receta}
               </Text>
@@ -416,17 +475,40 @@ const RecipeDetail = () => {
             >
               <TouchableOpacity
                 onPress={handleOpenSteps}
-                style={[styles.quickActionButton, styles.quickActionPrimary]}
+                style={[
+                  styles.quickActionButton,
+                  {
+                    backgroundColor: theme.accent,
+                    borderColor: 'rgba(250, 204, 21, 0.35)',
+                    shadowColor: theme.shadow,
+                  },
+                ]}
               >
-                <PlayIcon size={hp(2.2)} color="#3a2200" />
-                <Text style={styles.quickActionPrimaryText}>Modo cocinar</Text>
+                <PlayIcon size={hp(2.2)} color={theme.accentTextOn} />
+                <Text
+                  style={[
+                    styles.quickActionPrimaryText,
+                    { color: theme.accentTextOn },
+                  ]}
+                >
+                  Modo cocinar
+                </Text>
               </TouchableOpacity>
               {recipe.media.length > 1 ? (
                 <TouchableOpacity
                   onPress={() => toggleSection('videos')}
-                  style={styles.quickActionButton}
+                  style={[
+                    styles.quickActionButton,
+                    {
+                      backgroundColor: theme.surface,
+                      borderColor: theme.border,
+                      shadowColor: theme.shadow,
+                    },
+                  ]}
                 >
-                  <Text style={styles.quickActionText}>Ver videos</Text>
+                  <Text style={[styles.quickActionText, { color: theme.text }]}>
+                    Ver videos
+                  </Text>
                 </TouchableOpacity>
               ) : null}
             </Animated.View>
@@ -546,8 +628,12 @@ const RecipeDetail = () => {
                   {Object.keys(recipe.ingredientes).map((key) => (
                     <View key={key} className="space-y-1">
                       <Text
-                        style={{ fontSize: hp(2.4), paddingBottom: 4 }}
-                        className="font-bold text-white"
+                        style={{
+                          fontSize: hp(2.4),
+                          paddingBottom: 4,
+                          fontWeight: '800',
+                          color: theme.text,
+                        }}
                       >
                         {key == 'ingredientes' ? '' : key}
                       </Text>
@@ -558,8 +644,11 @@ const RecipeDetail = () => {
                             className="bg-amber-300 rounded-full"
                           />
                           <Text
-                            style={{ fontSize: hp(2.1) }}
-                            className="font-medium text-white"
+                            style={{
+                              fontSize: hp(2.1),
+                              fontWeight: '600',
+                              color: theme.text,
+                            }}
                           >
                             {ingredient}
                           </Text>
@@ -585,24 +674,43 @@ const RecipeDetail = () => {
               >
                 <TouchableOpacity
                   onPress={handleOpenSteps}
-                  style={styles.inlineCookButton}
+                  style={[styles.inlineCookButton, { backgroundColor: theme.accent }]}
                 >
-                  <PlayIcon size={hp(2)} color="#3a2200" />
-                  <Text style={styles.inlineCookButtonText}>Abrir modo cocinar</Text>
+                  <PlayIcon size={hp(2)} color={theme.accentTextOn} />
+                  <Text
+                    style={[
+                      styles.inlineCookButtonText,
+                      { color: theme.accentTextOn },
+                    ]}
+                  >
+                    Abrir modo cocinar
+                  </Text>
                 </TouchableOpacity>
                 {Object.keys(recipe.preparacion).map((key) => (
-                  <View key={key} style={styles.instructionsGroup}>
+                  <View
+                    key={key}
+                    style={[
+                      styles.instructionsGroup,
+                      {
+                        backgroundColor: theme.surface,
+                        borderColor: theme.border,
+                      },
+                    ]}
+                  >
                     <Text
-                      style={{ fontSize: hp(2.4) }}
-                      className="font-bold text-white"
+                      style={{ fontSize: hp(2.4), color: theme.text }}
+                      className="font-bold"
                     >
                       {key == 'pasos' ? '' : key}
                     </Text>
                     {recipe.preparacion[key].map((step, i) => (
                       <Text
                         key={i}
-                        style={{ fontSize: hp(2.1), marginBottom: 6 }}
-                        className="text-white"
+                        style={{
+                          fontSize: hp(2.1),
+                          marginBottom: 6,
+                          color: theme.textMuted,
+                        }}
                       >
                         {step}
                       </Text>
@@ -625,11 +733,22 @@ const RecipeDetail = () => {
                   isExpanded={expandedSections.tips}
                   onToggle={() => toggleSection('tips')}
                 >
-                  <View style={styles.tipCard}>
+                  <View
+                    style={[
+                      styles.tipCard,
+                      {
+                        backgroundColor: theme.surface,
+                        borderColor: theme.border,
+                        shadowColor: theme.shadow,
+                      },
+                    ]}
+                  >
                     {recipe.tips.map((tip, index) => (
                       <View key={index} style={styles.bulletPointContainerTips}>
                         <View style={styles.bulletPointTips} />
-                        <Text style={styles.tipText}>{tip}</Text>
+                        <Text style={[styles.tipText, { color: theme.textMuted }]}>
+                          {tip}
+                        </Text>
                       </View>
                     ))}
                   </View>
@@ -699,13 +818,21 @@ const RecipeDetail = () => {
                     {recipe.media.slice(1).map((url, index) => {
                       if (!url) return null;
 
-                      const embedUrl = `https://www.youtube.com/embed/${url}`;
+                      const videoId = getYouTubeVideoId(url);
+                      if (!videoId) {
+                        return null;
+                      }
+
                       return (
                         <View key={index} style={styles.videoContainer}>
-                          <WebView
-                            style={styles.webView}
-                            javaScriptEnabled={true}
-                            source={{ uri: embedUrl }}
+                          <YoutubePlayer
+                            height={200}
+                            videoId={videoId}
+                            webViewProps={{
+                              allowsFullscreenVideo: true,
+                              javaScriptEnabled: true,
+                              domStorageEnabled: true,
+                            }}
                           />
                         </View>
                       );
@@ -904,7 +1031,7 @@ const RecipeDetail = () => {
           </View>
         </Modal>
       </SafeAreaView>
-    </ImageBackground>
+    </AppBackground>
   );
 };
 
@@ -978,6 +1105,7 @@ const styles = StyleSheet.create({
   sectionIconWrap: {
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
     borderRadius: 16,
     height: 34,
     justifyContent: 'center',
@@ -1035,6 +1163,7 @@ const styles = StyleSheet.create({
   },
   instructionsGroup: {
     backgroundColor: 'rgba(10, 10, 10, 0.24)',
+    borderWidth: 1,
     borderRadius: 12,
     marginBottom: 10,
     paddingHorizontal: 10,
@@ -1055,14 +1184,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   tipCard: {
-    backgroundColor: 'rgba(96, 32, 32, 0.32)',
+    backgroundColor: 'rgba(17, 24, 39, 0.60)',
     padding: 14,
-    borderRadius: 8,
+    borderRadius: 14,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
 
   tipText: {

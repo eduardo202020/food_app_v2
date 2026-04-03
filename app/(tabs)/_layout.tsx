@@ -1,23 +1,26 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 function AnimatedTabIcon({
   name,
   color,
   focused,
+  activeBg,
+  shadowColor,
 }: {
   name: React.ComponentProps<typeof Ionicons>['name'];
   color: string;
   focused: boolean;
+  activeBg: string;
+  shadowColor: string;
 }) {
   const scale = useSharedValue(focused ? 1.18 : 1);
   const translateY = useSharedValue(focused ? -4 : 0);
@@ -41,7 +44,7 @@ function AnimatedTabIcon({
     <Animated.View
       style={[
         styles.iconWrap,
-        focused && styles.iconWrapActive,
+        focused && [styles.iconWrapActive, { backgroundColor: activeBg, shadowColor }],
         animatedStyle,
       ]}
     >
@@ -51,18 +54,26 @@ function AnimatedTabIcon({
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: theme.tabBarActiveTint,
+        tabBarInactiveTintColor: theme.tabBarInactiveTint,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#fbd34d',
+          backgroundColor: theme.tabBarBg,
+          borderTopColor: theme.tabBarBorder,
+          borderTopWidth: 1,
           height: 68,
           paddingTop: 8,
           paddingBottom: 8,
+          shadowColor: theme.shadow,
+          shadowOpacity: 0.25,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: -6 },
+          elevation: 14,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -79,6 +90,12 @@ export default function TabLayout() {
               name={focused ? 'home' : 'home-outline'}
               color={color}
               focused={focused}
+              activeBg={
+                theme.mode === 'dark'
+                  ? 'rgba(250, 204, 21, 0.16)'
+                  : 'rgba(250, 204, 21, 0.28)'
+              }
+              shadowColor={theme.shadow}
             />
           ),
         }}
@@ -92,6 +109,12 @@ export default function TabLayout() {
               name={focused ? 'search' : 'search-outline'}
               color={color}
               focused={focused}
+              activeBg={
+                theme.mode === 'dark'
+                  ? 'rgba(250, 204, 21, 0.16)'
+                  : 'rgba(250, 204, 21, 0.28)'
+              }
+              shadowColor={theme.shadow}
             />
           ),
         }}
@@ -105,6 +128,12 @@ export default function TabLayout() {
               name={focused ? 'heart' : 'heart-outline'}
               color={color}
               focused={focused}
+              activeBg={
+                theme.mode === 'dark'
+                  ? 'rgba(250, 204, 21, 0.16)'
+                  : 'rgba(250, 204, 21, 0.28)'
+              }
+              shadowColor={theme.shadow}
             />
           ),
         }}
@@ -122,7 +151,7 @@ const styles = StyleSheet.create({
     minWidth: 36,
   },
   iconWrapActive: {
-    backgroundColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: 'rgba(250, 204, 21, 0.16)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,

@@ -1,8 +1,6 @@
 import {
   View,
-  ImageBackground,
   StatusBar,
-  ScrollView,
   ActivityIndicator,
   Text,
 } from "react-native";
@@ -15,6 +13,7 @@ import { useFocusEffect } from "expo-router";
 import { getRecipesBySlugs } from "@/lib/recipes-db";
 import type { Recipe } from "@/types/recipe";
 import { getLikedRecipeSlugs } from "@/utils/storageUtils";
+import { AppBackground } from "@/components/AppBackground";
 
 const FavoritesScreen = () => {
   const db = useSQLiteContext();
@@ -51,32 +50,21 @@ const FavoritesScreen = () => {
   );
 
   return (
-    <ImageBackground
-      source={require("@/assets/images/madera4.jpg")}
-      style={{ flex: 1 }}
-      width={100}
-    >
-      <StatusBar barStyle={"dark-content"} />
-      <SafeAreaView>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 10 }}
-        >
-          <View>
-            {isLoading ? (
-              <View style={{ paddingVertical: 24, alignItems: "center" }}>
-                <ActivityIndicator color="#facc15" size="large" />
-                <Text style={{ color: "white", marginTop: 12 }}>
-                  Cargando favoritos...
-                </Text>
-              </View>
-            ) : (
-              <Recetas meals={favoriteRecipes} />
-            )}
+    <AppBackground>
+      <StatusBar barStyle={"light-content"} />
+      <SafeAreaView style={{ flex: 1 }}>
+        {isLoading ? (
+          <View style={{ paddingVertical: 24, alignItems: "center" }}>
+            <ActivityIndicator color="#facc15" size="large" />
+            <Text style={{ color: "white", marginTop: 12 }}>
+              Cargando favoritos...
+            </Text>
           </View>
-        </ScrollView>
+        ) : (
+          <Recetas meals={favoriteRecipes} />
+        )}
       </SafeAreaView>
-    </ImageBackground>
+    </AppBackground>
   );
 };
 

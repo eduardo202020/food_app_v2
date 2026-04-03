@@ -1,6 +1,5 @@
 import {
   ActivityIndicator,
-  ImageBackground,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -22,9 +21,13 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import { AppBackground } from "@/components/AppBackground";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SeasonScreen = () => {
   const db = useSQLiteContext();
+  const { theme } = useAppTheme();
   const { temporada } = useLocalSearchParams();
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
   const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
@@ -44,8 +47,21 @@ const SeasonScreen = () => {
 
     navigation.setOptions({
       title: `Temporada ${filteredTemporada.temporada}`,
+      headerShown: true,
+      headerTitleAlign: "center",
+      headerTintColor: theme.text,
+      headerStyle: {
+        backgroundColor:
+          theme.mode === "light"
+            ? "rgba(255,255,255,0.92)"
+            : "rgba(17,24,39,0.92)",
+      },
+      headerTitleStyle: {
+        fontWeight: "800",
+      },
+      headerShadowVisible: false,
     });
-  }, [filteredTemporada, navigation]);
+  }, [filteredTemporada, navigation, theme]);
 
   useEffect(() => {
     let isMounted = true;
@@ -84,79 +100,99 @@ const SeasonScreen = () => {
   }
 
   return (
-    <ImageBackground
-      source={require("@/assets/images/madera4.jpg")}
-      style={{ flex: 1 }}
-      width={100}
-    >
-      <StatusBar barStyle={"dark-content"} />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 10, width: wp(100) }}
-      >
-        <View style={styles.seasonInfo}>
-          <Image
-            source={filteredTemporada.imagen}
-            style={styles.seasonImage}
-            resizeMode="cover"
-          />
-          <Text style={styles.seasonTitle}>
-            Temporada {filteredTemporada.temporada}
-          </Text>
-          <Text style={styles.seasonText}>
-            Ganador: {filteredTemporada.ganador}
-          </Text>
-          <Text style={styles.seasonText}>
-            Tercer Puesto: {filteredTemporada.tercer_puesto}
-          </Text>
-          <Text style={styles.seasonText}>Participantes:</Text>
-          {filteredTemporada.participantes.map((participante, index) => (
-            <View
-              key={index}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginLeft: 10,
-              }}
+    <AppBackground>
+      <StatusBar barStyle={theme.statusBarStyle} />
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.pageContent}
+        >
+          <View
+            style={[
+              styles.seasonInfo,
+              {
+                backgroundColor: theme.surfaceStrong,
+                borderColor: theme.border,
+                shadowColor: theme.shadow,
+              },
+            ]}
+          >
+            <Image
+              source={filteredTemporada.imagen}
+              style={styles.seasonImage}
+              resizeMode="cover"
+            />
+            <Text
+              style={[
+                styles.seasonTitle,
+                { color: theme.mode === "light" ? theme.tabBarActiveTint : theme.accent },
+              ]}
             >
-              <Text
-                style={{
-                  backgroundColor: "blue",
-                  borderRadius: 50,
-                  width: hp(1),
-                  height: hp(1),
-                }}
-              ></Text>
-              <Text key={index} style={styles.participanteText}>
-                {participante}
-              </Text>
-            </View>
-          ))}
-          <Text style={styles.seasonText2}>Resumen:</Text>
-          <Text style={styles.seasonText}>{filteredTemporada.resumen}</Text>
-          {isLoadingRecipes ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator color="#facc15" size="large" />
-              <Text style={styles.loadingText}>Cargando recetas...</Text>
-            </View>
-          ) : (
-            <Recetas meals={filteredRecipes} />
-          )}
-        </View>
-      </ScrollView>
-    </ImageBackground>
+              Temporada {filteredTemporada.temporada}
+            </Text>
+            <Text style={[styles.seasonText, { color: theme.textMuted }]}>
+              Ganador: <Text style={{ color: theme.text }}>{filteredTemporada.ganador}</Text>
+            </Text>
+            <Text style={[styles.seasonText, { color: theme.textMuted }]}>
+              Tercer Puesto:{" "}
+              <Text style={{ color: theme.text }}>{filteredTemporada.tercer_puesto}</Text>
+            </Text>
+            <Text style={[styles.seasonText, { color: theme.text }]}>
+              Participantes:
+            </Text>
+            {filteredTemporada.participantes.map((participante, index) => (
+              <View key={index} style={styles.participanteRow}>
+                <View
+                  style={[
+                    styles.participanteDot,
+                    { backgroundColor: theme.accent },
+                  ]}
+                />
+                <Text style={[styles.participanteText, { color: theme.text }]}>
+                  {participante}
+                </Text>
+              </View>
+            ))}
+            <Text style={[styles.seasonText2, { color: theme.text }]}>Resumen:</Text>
+            <Text style={[styles.seasonText, { color: theme.textMuted }]}>
+              {filteredTemporada.resumen}
+            </Text>
+            {isLoadingRecipes ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator color={theme.accent} size="large" />
+                <Text style={[styles.loadingText, { color: theme.textMuted }]}>
+                  Cargando recetas...
+                </Text>
+              </View>
+            ) : (
+              <Recetas meals={filteredRecipes} />
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </AppBackground>
   );
 };
 
 export default SeasonScreen;
 
 const styles = StyleSheet.create({
+  pageContent: {
+    paddingBottom: 110,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    width: wp(100),
+  },
   seasonInfo: {
     padding: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    borderRadius: 12,
-    marginBottom: 16,
+    borderRadius: 16,
     width: "100%",
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 7,
   },
   seasonImage: {
     width: "100%",
@@ -166,23 +202,31 @@ const styles = StyleSheet.create({
   seasonTitle: {
     fontSize: hp(4),
     fontWeight: "bold",
-    color: "yellow",
     marginVertical: 10,
   },
   seasonText: {
     fontSize: hp(2.4),
-    color: "white",
     marginVertical: 4,
   },
   seasonText2: {
     fontSize: hp(3),
-    color: "white",
     marginTop: 10,
+    fontWeight: "800",
+  },
+  participanteRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 10,
+    marginTop: 6,
+  },
+  participanteDot: {
+    borderRadius: 50,
+    width: hp(1),
+    height: hp(1),
+    marginRight: 10,
   },
   participanteText: {
     fontSize: hp(2),
-    color: "white",
-    marginLeft: 10,
   },
   loadingContainer: {
     alignItems: "center",
@@ -190,7 +234,6 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   loadingText: {
-    color: "white",
     fontSize: hp(2),
     marginTop: 12,
   },

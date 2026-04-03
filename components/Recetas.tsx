@@ -1,29 +1,31 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
 import type { Recipe } from '@/types/recipe';
 import { RecipeCard } from './RecipeCard';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 export default function Recetas({ meals }: { meals: Recipe[] }) {
+  const { theme } = useAppTheme();
+
   return (
-    <View style={styles.container}>
-      <View>
-        {meals.length === 0 ? (
-          <Text style={styles.noRecipesText}>Ninguna Receta Guardada.</Text>
-        ) : (
-          <MasonryList
-            data={meals}
-            keyExtractor={(item: any) => item.slug}
-            numColumns={1}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item, i }: { item: unknown; i: number }) => (
-              <RecipeCard item={item as Recipe} index={i} />
-            )}
-            onEndReachedThreshold={0.1}
-          />
+    meals.length === 0 ? (
+      <Text style={[styles.noRecipesText, { color: theme.textMuted }]}>
+        Ninguna Receta Guardada.
+      </Text>
+    ) : (
+      <MasonryList
+        data={meals}
+        keyExtractor={(item: Recipe) => item.slug}
+        numColumns={1}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+        renderItem={({ item, i }: { item: unknown; i: number }) => (
+          <RecipeCard item={item as Recipe} index={i} />
         )}
-      </View>
-    </View>
+        onEndReachedThreshold={0.1}
+      />
+    )
   );
 }
 
@@ -77,10 +79,10 @@ export default function Recetas({ meals }: { meals: Recipe[] }) {
 // };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
-    overflow: 'hidden',
+  content: {
     paddingTop: 16,
+    paddingBottom: 18,
+    paddingHorizontal: 12,
   },
   title: {
     fontSize: 30,
@@ -99,19 +101,24 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(96, 32, 32, 0.5)',
+    backgroundColor: 'rgba(17, 24, 39, 0.60)',
     padding: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 10,
     },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   recipeImage: {
     width: '100%',
     height: 150,
     borderRadius: 16,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#0b1220',
   },
   recipeTitle: {
     marginTop: 8,

@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   Dimensions,
   Image,
   StyleSheet,
@@ -10,18 +9,20 @@ import React, { useCallback } from "react";
 import Carousel from "react-native-snap-carousel";
 import { tempProps, temporadas } from "@/data/temporadas";
 import { useRouter } from "expo-router";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 const { width, height } = Dimensions.get("window");
 
 interface RecipeCardProps {
   item: tempProps;
   onPress: () => void;
+  surfaceStyle?: object;
 }
 
-const RecipeCard = ({ item, onPress }: RecipeCardProps) => {
+const RecipeCard = ({ item, onPress, surfaceStyle }: RecipeCardProps) => {
   return (
     <TouchableOpacity onPress={onPress} style={{ paddingBottom: 15 }}>
-      <View style={[styles.cardContainer]}>
+      <View style={[styles.cardContainer, surfaceStyle]}>
         <Image source={item.imagen} style={styles.cardImage} />
       </View>
     </TouchableOpacity>
@@ -31,6 +32,7 @@ const RecipeCard = ({ item, onPress }: RecipeCardProps) => {
 const TrendingRecipes = () => {
   const router = useRouter();
   const isCarousel = React.useRef(null);
+  const { theme } = useAppTheme();
 
   // Memorizar la función de click
   const handleClick = useCallback(
@@ -45,12 +47,19 @@ const TrendingRecipes = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Temporadas:</Text>
 
       <Carousel
         data={temporadas}
         renderItem={({ item }: { item: tempProps }) => (
-          <RecipeCard item={item} onPress={() => handleClick(item.temporada)} />
+          <RecipeCard
+            item={item}
+            onPress={() => handleClick(item.temporada)}
+            surfaceStyle={{
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+              shadowColor: theme.shadow,
+            }}
+          />
         )}
         firstItem={1}
         inactiveSlideScale={0.8}
@@ -67,6 +76,7 @@ const TrendingRecipes = () => {
 const styles = StyleSheet.create({
   container: {
     marginBottom: 8,
+    marginTop: 6,
   },
   title: {
     color: "white",
@@ -78,23 +88,28 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     display: "flex",
-    borderColor: "black",
-    borderWidth: 2,
-    elevation: 20,
+    backgroundColor: "rgba(17, 24, 39, 0.45)",
+    borderColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 8,
     width: width * 0.7,
-    height: height * 0.3,
+    height: Math.min(height * 0.28, 260),
   },
   cardImage: {
     width: "100%",
-    height: height * 0.3,
+    height: Math.min(height * 0.28, 260),
     resizeMode: "cover",
   },
   slideStyle: {
     display: "flex",
     alignItems: "center",
-    elevation: 5,
+    elevation: 2,
     marginHorizontal: 10,
-    marginLeft: -8,
+    marginLeft: 0,
   },
 });
 
