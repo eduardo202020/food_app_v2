@@ -33,6 +33,15 @@ interface RecipeStep {
   verbosClave: string[];
 }
 
+const formatTimer = (seconds: number) => {
+  const mins = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const secs = (seconds % 60).toString().padStart(2, '0');
+
+  return `${mins}:${secs}`;
+};
+
 import { useIsRecipeLiked } from '@/hooks/useIsRecipeLiked';
 import { useLikedRecipes } from '@/hooks/useLikedRecipes';
 
@@ -49,6 +58,7 @@ import { WebView } from 'react-native-webview';
 import { glosario } from '@/data/glosario';
 import { getRecipeBySlug, getRelatedRecipes } from '@/lib/recipes-db';
 import type { Recipe } from '@/types/recipe';
+import { useKeepAwake } from 'expo-keep-awake';
 import { StatusBar } from 'expo-status-bar';
 import { Image } from 'expo-image';
 
@@ -121,6 +131,8 @@ const RecipeDetail = () => {
   );
   const [recipeSteps, setRecipeSteps] = useState<RecipeStep[]>([]);
   const [relatedRecipes, setRelatedRecipes] = useState<Recipe[]>([]);
+  const [cookTimerSeconds, setCookTimerSeconds] = useState(0);
+  const [isCookTimerRunning, setIsCookTimerRunning] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     ingredients: true,
     instructions: false,
@@ -133,6 +145,7 @@ const RecipeDetail = () => {
   const [currentStep, setCurrentStep] = useState(0);
 
   const router = useRouter();
+  useKeepAwake(modalVisible ? 'cook-mode' : undefined);
 
   useEffect(() => {
     let isMounted = true;
@@ -222,6 +235,8 @@ const RecipeDetail = () => {
     });
     setRecipeSteps(stepsArray);
     setCurrentStep(0);
+    setCookTimerSeconds(0);
+    setIsCookTimerRunning(false);
     setModalVisible(true);
   };
   const handleNextStep = () => {
@@ -250,6 +265,20 @@ const RecipeDetail = () => {
       [section]: !currentSections[section],
     }));
   };
+
+  useEffect(() => {
+    if (!modalVisible || !isCookTimerRunning) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCookTimerSeconds((currentSeconds) => currentSeconds + 1);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isCookTimerRunning, modalVisible]);
 
   // manejo de favoritos
   const { likeRecipe, unlikeRecipe } = useLikedRecipes();
@@ -762,8 +791,6 @@ const RecipeDetail = () => {
         <TouchableOpacity
           style={styles.fab}
           onPress={() => {
-            const firstPreparationKey = Object.keys(recipe.preparacion)[0];
-            const stepsArray = recipe.preparacion[firstPreparationKey];
             handleOpenSteps();
           }}
         >
@@ -780,26 +807,81 @@ const RecipeDetail = () => {
           onRequestClose={() => setModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>
-                {recipeSteps[currentStep]?.title == 'pasos'
-                  ? 'Instrucciones:'
-                  : recipeSteps[currentStep]?.title}
-              </Text>
-              <Text style={styles.modalTextTitle}>
-                Paso {recipeSteps[currentStep]?.stepNumber} de{' '}
-                {recipeSteps[currentStep]?.totalSteps}
-              </Text>
-              <Text style={styles.modalText}>
+            <View style={styles.cookModalContainer}>
+              <View style={styles.cookModalTopRow}>
+                <View>
+                  <Text style={styles.cookLabel}>Modo cocinar</Text>
+                  <Text style={styles.cookTitle}>
+                    {recipeSteps[currentStep]?.title == 'pasos'
+                      ? 'Instrucciones'
+                      : recipeSteps[currentStep]?.title || 'Paso actual'}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={styles.cookCloseIcon}
+                >
+                  <Text style={styles.cookCloseIconText}>X</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.cookProgressWrap}>
+                <View style={styles.cookProgressTrack}>
+                  <View
+                    style={[
+                      styles.cookProgressFill,
+                      {
+                        width: `${
+                          recipeSteps.length > 0
+                            ? ((currentStep + 1) / recipeSteps.length) * 100
+                            : 0
+                        }%`,
+                      },
+                    ]}
+                  />
+                </View>
+                <Text style={styles.modalTextTitle}>
+                  Paso {recipeSteps[currentStep]?.stepNumber} de{' '}
+                  {recipeSteps[currentStep]?.totalSteps}
+                </Text>
+              </View>
+              <View style={styles.cookTimerCard}>
+                <Text style={styles.cookTimerLabel}>Temporizador</Text>
+                <Text style={styles.cookTimerValue}>
+                  {formatTimer(cookTimerSeconds)}
+                </Text>
+                <View style={styles.cookTimerActions}>
+                  <TouchableOpacity
+                    onPress={() => setIsCookTimerRunning((running) => !running)}
+                    style={[styles.timerActionButton, styles.timerActionPrimary]}
+                  >
+                    <Text style={styles.timerActionPrimaryText}>
+                      {isCookTimerRunning ? 'Pausar' : 'Iniciar'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setCookTimerSeconds(0);
+                      setIsCookTimerRunning(false);
+                    }}
+                    style={styles.timerActionButton}
+                  >
+                    <Text style={styles.timerActionText}>Reiniciar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <Text style={styles.cookBodyText}>
                 {recipeSteps[currentStep]?.texto ||
                   'No hay información disponible'}
+              </Text>
+              <Text style={styles.cookHint}>
+                La pantalla permanecerá activa mientras este modo esté abierto.
               </Text>
               <View style={styles.stepNavigation}>
                 <TouchableOpacity
                   onPress={handlePreviousStep}
                   disabled={currentStep === 0}
                   style={[
-                    styles.stepButton,
+                    styles.cookStepButton,
                     currentStep === 0 && styles.disabledButton,
                   ]}
                 >
@@ -810,7 +892,7 @@ const RecipeDetail = () => {
                   onPress={handleNextStep}
                   disabled={currentStep === recipeSteps.length - 1}
                   style={[
-                    styles.stepButton,
+                    styles.cookStepButton,
                     currentStep === recipeSteps.length - 1 &&
                       styles.disabledButton,
                   ]}
@@ -818,13 +900,6 @@ const RecipeDetail = () => {
                   <Text style={styles.stepButtonText}>Siguiente</Text>
                 </TouchableOpacity>
               </View>
-
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={styles.closeButton}
-              >
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -1037,6 +1112,100 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
   },
+  cookModalContainer: {
+    width: '88%',
+    backgroundColor: '#fff8ef',
+    borderRadius: 22,
+    padding: 20,
+  },
+  cookModalTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  cookLabel: {
+    color: '#b45309',
+    fontSize: hp(1.6),
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  cookTitle: {
+    color: '#3a2200',
+    fontSize: hp(3),
+    fontWeight: '800',
+    marginTop: 4,
+  },
+  cookCloseIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f1e4d2',
+  },
+  cookCloseIconText: {
+    color: '#7c2d12',
+    fontSize: hp(2),
+    fontWeight: '800',
+  },
+  cookProgressWrap: {
+    marginBottom: 16,
+  },
+  cookProgressTrack: {
+    width: '100%',
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: '#ead9c5',
+    overflow: 'hidden',
+  },
+  cookProgressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: '#f59e0b',
+  },
+  cookTimerCard: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    marginBottom: 18,
+    padding: 16,
+  },
+  cookTimerLabel: {
+    color: '#9a3412',
+    fontSize: hp(1.8),
+    fontWeight: '700',
+  },
+  cookTimerValue: {
+    color: '#3a2200',
+    fontSize: hp(4.6),
+    fontWeight: '900',
+    marginVertical: 8,
+  },
+  cookTimerActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  timerActionButton: {
+    backgroundColor: '#efe1cf',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  timerActionPrimary: {
+    backgroundColor: '#fbbf24',
+  },
+  timerActionText: {
+    color: '#7c2d12',
+    fontSize: hp(1.8),
+    fontWeight: '800',
+  },
+  timerActionPrimaryText: {
+    color: '#3a2200',
+    fontSize: hp(1.8),
+    fontWeight: '900',
+  },
   modalTitle: {
     fontSize: hp(2.5),
     fontWeight: 'bold',
@@ -1052,6 +1221,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     marginTop: 20,
+  },
+  cookBodyText: {
+    color: '#3a2200',
+    fontSize: hp(2.6),
+    lineHeight: hp(3.5),
+  },
+  cookHint: {
+    color: '#92400e',
+    fontSize: hp(1.7),
+    marginTop: 10,
+  },
+  cookStepButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    backgroundColor: '#7c3aed',
+    borderRadius: 16,
+    minWidth: '47%',
   },
   stepButton: {
     paddingVertical: 10,

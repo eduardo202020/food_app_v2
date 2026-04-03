@@ -21,8 +21,6 @@ import { RecipeCard } from '@/components/RecipeCard';
 import { getRecipes } from '@/lib/recipes-db';
 import type { Recipe } from '@/types/recipe';
 
-import * as SplashScreen from 'expo-splash-screen';
-
 const HomeScreen = () => {
   const db = useSQLiteContext();
   const whatsappUrl = 'https://wa.me/51991004126';
@@ -35,11 +33,6 @@ const HomeScreen = () => {
 
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
   const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
-
-  // Prevent the splash screen from hiding automatically
-  useEffect(() => {
-    SplashScreen.preventAutoHideAsync();
-  }, []);
 
   // Función para manejar el cambio de dificultad
   const handleDificultad = (dificultad: string) => {
@@ -82,14 +75,6 @@ const HomeScreen = () => {
     };
   }, [activeCategory, activeDificultad, db]);
 
-  useEffect(() => {
-    const prepareScreen = async () => {
-      await SplashScreen.hideAsync();
-    };
-
-    prepareScreen();
-  }, []);
-
   const handleWhatsAppPress = async () => {
     const supported = await Linking.canOpenURL(whatsappUrl);
 
@@ -104,7 +89,7 @@ const HomeScreen = () => {
       style={{ flex: 1 }}
       width={100}
     >
-      <StatusBar barStyle={'dark-content'} />
+      <StatusBar barStyle={'light-content'} />
       <SafeAreaView>
         <View className="pb-4 flex-row justify-between items-center mx-4 border-solid border-b-stone-900 ">
           <TouchableOpacity onPress={handleWhatsAppPress}>
