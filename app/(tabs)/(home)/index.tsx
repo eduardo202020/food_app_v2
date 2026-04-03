@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   View,
   Text,
   StyleSheet,
@@ -6,31 +7,23 @@ import {
   ImageBackground,
   StatusBar,
   FlatList,
-  Modal,
-  TextInput,
-  Button,
-  Linking,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import TrendingRecipes from '@/components/TrendingRecipes';
-import {
-  recipeProps as foodDataProps,
-  recipeData as foodData,
-} from '@/data/recetario';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSQLiteContext } from 'expo-sqlite';
 import { FontAwesome, FontAwesome6 } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import Categorias from '@/components/Categorias';
 import Dificultades from '@/components/Dificultad';
 
 import { RecipeCard } from '@/components/RecipeCard';
-import { claves } from '@/data/encript';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getRecipes } from '@/lib/recipes-db';
+import type { Recipe } from '@/types/recipe';
 
 import * as SplashScreen from 'expo-splash-screen';
 
-const index = () => {
-  const router = useRouter();
+const HomeScreen = () => {
+  const db = useSQLiteContext();
 
   // Estado para la categoría activa y las recetas filtradas
   const [activeCategory, setActiveCategory] = useState<string>('Todo');
@@ -38,105 +31,62 @@ const index = () => {
   // Estado para la dificultad activa y las recetas filtradas
   const [activeDificultad, setActiveDificultad] = useState<string>('Todo');
 
-  const [filteredRecipes, setFilteredRecipes] =
-    useState<foodDataProps[]>(foodData);
-
-  // Estado para la verificación del código
-  const [modalVisible, setModalVisible] = useState(true);
-  const [inputValue, setInputValue] = useState('');
-  const [selectedKey, setSelectedKey] = useState('');
-  const [selectedValue, setSelectedValue] = useState('');
+  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
 
   // Prevent the splash screen from hiding automatically
   useEffect(() => {
     SplashScreen.preventAutoHideAsync();
   }, []);
 
-  // Función para actualizar las recetas filtradas
-  const updateFilteredRecipes = (category: string, dificultad: string) => {
-    let updatedRecipes = foodData;
-
-    if (category !== 'Todo') {
-      updatedRecipes = updatedRecipes.filter(
-        (recipe) => recipe.tipo === category
-      );
-    }
-
-    if (dificultad !== 'Todo') {
-      updatedRecipes = updatedRecipes.filter(
-        (recipe) => recipe.nivel_complejidad === dificultad
-      );
-    }
-
-    setFilteredRecipes(updatedRecipes);
-  };
-
   // Función para manejar el cambio de dificultad
   const handleDificultad = (dificultad: string) => {
     const newDificultad = activeDificultad === dificultad ? 'Todo' : dificultad;
     setActiveDificultad(newDificultad);
-    updateFilteredRecipes(activeCategory, newDificultad);
   };
 
   // Función para manejar el cambio de categoría
   const handleChangeCategory = (category: string) => {
     const newCategory = activeCategory === category ? 'Todo' : category;
     setActiveCategory(newCategory);
-    updateFilteredRecipes(newCategory, activeDificultad);
   };
 
-  // Verifica si el código ya ha sido validado antes
   useEffect(() => {
-    const checkVerification = async () => {
-      const verified = await AsyncStorage.getItem('isVerified');
-      if (verified === 'true') {
-        setModalVisible(false);
-      } else {
-        const randomIndex = Math.floor(Math.random() * claves.length);
-        const selectedPair = claves[randomIndex];
-        setSelectedKey(Object.keys(selectedPair)[0]);
-        setSelectedValue(Object.values(selectedPair)[0]);
-        setModalVisible(true);
+    let isMounted = true;
+
+    const loadRecipes = async () => {
+      setIsLoadingRecipes(true);
+
+      try {
+        const recipes = await getRecipes(db, {
+          category: activeCategory,
+          difficulty: activeDificultad,
+        });
+
+        if (isMounted) {
+          setFilteredRecipes(recipes);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingRecipes(false);
+        }
       }
-      // Hide the splash screen once everything is ready
+    };
+
+    loadRecipes();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeCategory, activeDificultad, db]);
+
+  useEffect(() => {
+    const prepareScreen = async () => {
       await SplashScreen.hideAsync();
     };
 
-    checkVerification();
+    prepareScreen();
   }, []);
-
-  // Validar la entrada del usuario y guardar el estado de verificación
-  const handleValidation = async () => {
-    if (inputValue === selectedValue) {
-      await AsyncStorage.setItem('isVerified', 'true');
-      setModalVisible(false);
-    } else {
-      alert('Código incorrecto. Inténtalo de nuevo.');
-    }
-  };
-
-  const handleWhatsAppPress = () => {
-    const phoneNumber = '+51991004126'; // Reemplaza con tu número de teléfono incluyendo el código de país
-    const message = `${selectedKey}`; // Mensaje a enviar
-    // Mensaje a enviar
-    const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
-      message
-    )}`;
-
-    Linking.openURL(url).catch(() => {
-      alert('Asegúrate de tener WhatsApp instalado en tu dispositivo');
-    });
-  };
-
-  // borrar lo que haya en mi asyncSorage
-  const clearAsyncStorage = async () => {
-    try {
-      await AsyncStorage.clear();
-      console.log('AsyncStorage ha sido borrado.');
-    } catch (error) {
-      console.error('Error al borrar AsyncStorage:', error);
-    }
-  };
 
   return (
     <ImageBackground
@@ -146,43 +96,6 @@ const index = () => {
     >
       <StatusBar barStyle={'dark-content'} />
       <SafeAreaView>
-        {/* Modal de verificación */}
-        {modalVisible && (
-          <Modal
-            visible={modalVisible}
-            transparent={true}
-            animationType="slide"
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalText}>
-                  Introduce el código correspondiente a la clave:
-                </Text>
-                <Text style={styles.modalKey}>{selectedKey}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={inputValue}
-                  onChangeText={(text) => setInputValue(text)}
-                  placeholder="Introduce el valor"
-                  placeholderTextColor="gray"
-                />
-                <View style={{ display: 'flex' }}>
-                  <Button title="Validar" onPress={handleValidation} />
-                  <TouchableOpacity
-                    style={styles.whatsappButton}
-                    onPress={handleWhatsAppPress}
-                  >
-                    <FontAwesome name="whatsapp" size={24} color="white" />
-                    <Text style={styles.whatsappButtonText}>
-                      Contactar por WhatsApp
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </Modal>
-        )}
-
         <View className="pb-4 flex-row justify-between items-center mx-4 border-solid border-b-stone-900 ">
           <FontAwesome6 name="bars-staggered" size={24} color="white" />
           <Text className="text-white text-3xl font-bold">
@@ -222,6 +135,13 @@ const index = () => {
                 activeCategory={activeCategory}
                 handleChangeCategory={handleChangeCategory}
               />
+
+              {isLoadingRecipes ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator color="#facc15" size="large" />
+                  <Text style={styles.loadingText}>Cargando recetas...</Text>
+                </View>
+              ) : null}
             </View>
           }
         />
@@ -230,7 +150,7 @@ const index = () => {
   );
 };
 
-export default index;
+export default HomeScreen;
 
 // crea los estilos
 const styles = StyleSheet.create({
@@ -239,50 +159,14 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
   },
-  modalContainer: {
-    flex: 1,
+  loadingContainer: {
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingVertical: 24,
   },
-  modalContent: {
-    width: '80%',
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    fontSize: 18,
-    textAlign: 'center',
-  },
-  modalKey: {
-    marginBottom: 15,
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 20,
-    width: '100%',
-  },
-  whatsappButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#25D366', // Color de WhatsApp
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 15,
-  },
-  whatsappButtonText: {
-    marginLeft: 10,
+  loadingText: {
     color: 'white',
     fontSize: 16,
+    marginTop: 12,
   },
 });

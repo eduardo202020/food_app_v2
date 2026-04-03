@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   View,
   Text,
   ScrollView,
@@ -11,6 +12,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import {
   ChevronLeftIcon,
   BoltIcon,
@@ -19,8 +21,6 @@ import {
 } from 'react-native-heroicons/outline';
 
 import { HeartIcon } from 'react-native-heroicons/solid';
-
-import { recipeData as foodData } from '@/data/recetario';
 
 interface RecipeStep {
   title: string;
@@ -44,6 +44,8 @@ import {
 import { WebView } from 'react-native-webview';
 
 import { glosario } from '@/data/glosario';
+import { getRecipeBySlug } from '@/lib/recipes-db';
+import type { Recipe } from '@/types/recipe';
 import { StatusBar } from 'expo-status-bar';
 import { Image } from 'expo-image';
 
@@ -68,8 +70,10 @@ const getCategoryImage = (value: string): any => {
 };
 
 const RecipeDetail = () => {
+  const db = useSQLiteContext();
   const { slug } = useLocalSearchParams();
-  const recipe = foodData.find((r) => r.slug === slug);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [isLoadingRecipe, setIsLoadingRecipe] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisibleGlosary, setModalVisibleGlosary] = useState(false);
 
@@ -84,13 +88,40 @@ const RecipeDetail = () => {
   const [currentStep, setCurrentStep] = useState(0);
 
   const router = useRouter();
-  if (!recipe) {
-    return (
-      <View>
-        <Text>No se encontraron recetas</Text>
-      </View>
-    );
-  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadRecipe = async () => {
+      if (typeof slug !== 'string') {
+        if (isMounted) {
+          setRecipe(null);
+          setIsLoadingRecipe(false);
+        }
+        return;
+      }
+
+      setIsLoadingRecipe(true);
+
+      try {
+        const loadedRecipe = await getRecipeBySlug(db, slug);
+
+        if (isMounted) {
+          setRecipe(loadedRecipe);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingRecipe(false);
+        }
+      }
+    };
+
+    loadRecipe();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [db, slug]);
 
   const handleGlossaryClick = (term: string) => {
     const definition = glosario.find((item) => item[term]);
@@ -104,6 +135,10 @@ const RecipeDetail = () => {
   const colorStatusBar = modalVisible || modalVisibleGlosary ? '#00000080' : '';
 
   const handleOpenSteps = () => {
+    if (!recipe) {
+      return;
+    }
+
     const stepsArray: any = [];
     Object.keys(recipe.preparacion).forEach((key) => {
       recipe.preparacion[key].forEach((step, index) => {
@@ -133,10 +168,10 @@ const RecipeDetail = () => {
 
   // manejo de favoritos
   const { likeRecipe, unlikeRecipe } = useLikedRecipes();
-  const isInitiallyLiked = useIsRecipeLiked(recipe.nombre_receta);
+  const isInitiallyLiked = useIsRecipeLiked(recipe?.nombre_receta ?? '');
 
   // Estado para manejar si la receta está en favoritos
-  const [isLiked, setIsLiked] = useState(isInitiallyLiked);
+  const [isLiked, setIsLiked] = useState(false);
 
   // Efecto para actualizar `isLiked` cuando cambie la lista de recetas que te gustan
   useEffect(() => {
@@ -144,6 +179,10 @@ const RecipeDetail = () => {
   }, [isInitiallyLiked]);
 
   const handleLiked = () => {
+    if (!recipe) {
+      return;
+    }
+
     if (isLiked) {
       unlikeRecipe(recipe.nombre_receta);
     } else {
@@ -151,6 +190,35 @@ const RecipeDetail = () => {
     }
     setIsLiked(!isLiked); // Actualiza el estado local inmediatamente
   };
+
+  if (isLoadingRecipe) {
+    return (
+      <ImageBackground
+        source={require('@/assets/images/madera4.jpg')}
+        style={{ flex: 1 }}
+        width={100}
+      >
+        <SafeAreaView style={styles.loadingContainer}>
+          <ActivityIndicator color="#facc15" size="large" />
+          <Text style={styles.loadingText}>Cargando receta...</Text>
+        </SafeAreaView>
+      </ImageBackground>
+    );
+  }
+
+  if (!recipe) {
+    return (
+      <ImageBackground
+        source={require('@/assets/images/madera4.jpg')}
+        style={{ flex: 1 }}
+        width={100}
+      >
+        <SafeAreaView style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>No se encontraron recetas.</Text>
+        </SafeAreaView>
+      </ImageBackground>
+    );
+  }
 
   return (
     <ImageBackground
@@ -623,6 +691,16 @@ const RecipeDetail = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: hp(2.2),
+    marginTop: 12,
+  },
   videoContainer: {
     width: Dimensions.get('window').width * 0.8,
     height: 200,

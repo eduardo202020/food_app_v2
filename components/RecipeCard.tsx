@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useRouter } from "expo-router";
-import { recipeProps as foodDataProps } from "@/data/recetario";
+import type { Recipe } from "@/types/recipe";
 
 
 export const RecipeCard = ({
     item,
     index,
   }: {
-    item: foodDataProps;
+    item: Recipe;
     index: number;
   }) => {
     const router = useRouter();

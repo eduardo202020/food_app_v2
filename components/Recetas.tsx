@@ -1,13 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Image } from 'expo-image';
+import { View, Text, StyleSheet } from 'react-native';
 import MasonryList from '@react-native-seoul/masonry-list';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
-import { recipeProps as foodDataProps } from '@/data/recetario';
+import type { Recipe } from '@/types/recipe';
 import { RecipeCard } from './RecipeCard';
 
-export default function Recetas({ meals }: { meals: foodDataProps[] }) {
+export default function Recetas({ meals }: { meals: Recipe[] }) {
   return (
     <View style={styles.container}>
       <View>
@@ -20,7 +17,7 @@ export default function Recetas({ meals }: { meals: foodDataProps[] }) {
             numColumns={1}
             showsVerticalScrollIndicator={false}
             renderItem={({ item, i }: { item: unknown; i: number }) => (
-              <RecipeCard item={item as foodDataProps} index={i} />
+              <RecipeCard item={item as Recipe} index={i} />
             )}
             onEndReachedThreshold={0.1}
           />

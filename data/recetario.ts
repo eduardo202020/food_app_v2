@@ -1,22 +1,8 @@
-export interface recipeProps {
-  episodio: number;
-  nombre_receta: string;
-  tipo: string;
-  media: string[];
-  ingredientes: {
-    [key: string]: string[];
-  };
-  preparacion: {
-    [key: string]: string[];
-  };
-  tips: string[];
-  temporada: number;
-  nivel_complejidad: string;
-  glosario: string[];
-  slug: string;
-}
+import type { Recipe } from '@/types/recipe';
 
-export const recipeData: recipeProps[] = [
+export type recipeProps = Recipe;
+
+export const recipeData: Recipe[] = [
   {
     episodio: 1,
     nombre_receta: "PAN CON SANGRECITA",

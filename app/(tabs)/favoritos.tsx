@@ -1,39 +1,55 @@
-import { View, ImageBackground, StatusBar, ScrollView } from "react-native";
+import {
+  View,
+  ImageBackground,
+  StatusBar,
+  ScrollView,
+  ActivityIndicator,
+  Text,
+} from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSQLiteContext } from "expo-sqlite";
 
 import { useLikedRecipes } from "@/hooks/useLikedRecipes";
-import { recipeData, recipeProps } from "@/data/recetario";
 import Recetas from "@/components/Recetas";
 import { useFocusEffect } from "expo-router";
+import { getRecipesByNames } from "@/lib/recipes-db";
+import type { Recipe } from "@/types/recipe";
 import { getLikedRecipes } from "@/utils/storageUtils";
 
-type Props = {};
-
-const findRecipesFavorites = (
-  recipes: recipeProps[],
-  likedRecipes: string[]
-) => {
-  return recipes.filter((recipe) =>
-    likedRecipes.includes(recipe.nombre_receta)
-  );
-};
-
-const favoritos = (props: Props) => {
+const FavoritesScreen = () => {
+  const db = useSQLiteContext();
   const { likedRecipes } = useLikedRecipes();
-  const [favoriteRecipes, setFavoriteRecipes] = useState<recipeProps[]>([]);
+  const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useFocusEffect(
     React.useCallback(() => {
-      // Actualiza las recetas favoritas cada vez que la pantalla recibe el enfoque
+      let isMounted = true;
 
       const fetchLikedRecipes = async () => {
-        const recipes = await getLikedRecipes();
-        setFavoriteRecipes(findRecipesFavorites(recipeData, recipes));
+        setIsLoading(true);
+
+        try {
+          const recipes = await getLikedRecipes();
+          const favorites = await getRecipesByNames(db, recipes);
+
+          if (isMounted) {
+            setFavoriteRecipes(favorites);
+          }
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }
       };
 
       fetchLikedRecipes();
-    }, [likedRecipes, setFavoriteRecipes])
+
+      return () => {
+        isMounted = false;
+      };
+    }, [db, likedRecipes])
   );
 
   return (
@@ -49,7 +65,16 @@ const favoritos = (props: Props) => {
           contentContainerStyle={{ paddingBottom: 10 }}
         >
           <View>
-            <Recetas meals={favoriteRecipes} />
+            {isLoading ? (
+              <View style={{ paddingVertical: 24, alignItems: "center" }}>
+                <ActivityIndicator color="#facc15" size="large" />
+                <Text style={{ color: "white", marginTop: 12 }}>
+                  Cargando favoritos...
+                </Text>
+              </View>
+            ) : (
+              <Recetas meals={favoriteRecipes} />
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -57,4 +82,4 @@ const favoritos = (props: Props) => {
   );
 };
 
-export default favoritos;
+export default FavoritesScreen;

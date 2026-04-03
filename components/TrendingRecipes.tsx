@@ -36,7 +36,7 @@ const TrendingRecipes = () => {
   const handleClick = useCallback(
     (temporada: number) => {
       router.push({
-        pathname: "/(home)/Temporadas/",
+        pathname: "/(tabs)/(home)/Temporadas",
         params: { temporada },
       });
     },
@@ -45,7 +45,7 @@ const TrendingRecipes = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Temporadas:</Text>
+      <Text style={styles.title}>Temporadas v2:</Text>
 
       <Carousel
         data={temporadas}

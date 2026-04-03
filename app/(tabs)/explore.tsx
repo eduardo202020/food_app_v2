@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   View,
   Text,
   TextInput,
@@ -8,37 +9,56 @@ import {
   StyleSheet,
   FlatList,
 } from "react-native";
-import React, { useCallback, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { XMarkIcon } from "react-native-heroicons/outline";
+import { useSQLiteContext } from "expo-sqlite";
 
 import { RecipeCard } from "@/components/RecipeCard";
-
-import {
-  recipeProps as foodDataProps,
-  recipeData as foodData,
-} from "@/data/recetario";
-
-import { debounce } from "lodash";
+import { searchRecipesByName } from "@/lib/recipes-db";
+import type { Recipe } from "@/types/recipe";
 import { useRouter } from "expo-router";
 
 const SearchScreen = () => {
+  const db = useSQLiteContext();
   const router = useRouter();
 
-  const [results, setResults] = useState<foodDataProps[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [results, setResults] = useState<Recipe[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const handleSearch = (value: string) => {
-    if (value && value.length > 2) {
-      const filteredRecipes = foodData.filter((recipe) =>
-        recipe.nombre_receta.toLowerCase().includes(value.toLowerCase())
-      );
-      setResults(filteredRecipes);
-    } else {
+  useEffect(() => {
+    let isMounted = true;
+
+    if (searchText.trim().length < 3) {
       setResults([]);
+      setIsSearching(false);
+      return () => {
+        isMounted = false;
+      };
     }
-  };
 
-  const handleTextDebounce = useCallback(debounce(handleSearch, 10), []);
+    setIsSearching(true);
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const recipes = await searchRecipesByName(db, searchText);
+
+        if (isMounted) {
+          setResults(recipes);
+        }
+      } finally {
+        if (isMounted) {
+          setIsSearching(false);
+        }
+      }
+    }, 180);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [db, searchText]);
 
   return (
     <ImageBackground
@@ -49,7 +69,8 @@ const SearchScreen = () => {
       <SafeAreaView className=" flex-1 pt-4">
         <View className="mx-4 pl-2 mb-3 flex-row justify-between items-center border border-neutral-500 rounded-full ">
           <TextInput
-            onChangeText={handleTextDebounce}
+            value={searchText}
+            onChangeText={setSearchText}
             placeholder="Buscar Recetas"
             placeholderTextColor={"lightgray"}
             className="pb-1 pl-6 text-base font-semibold text-yellow-500 tracking-wider flex-1 "
@@ -63,6 +84,13 @@ const SearchScreen = () => {
             <XMarkIcon size="25" color="white" />
           </TouchableOpacity>
         </View>
+
+        {isSearching ? (
+          <View style={styles.logoContent}>
+            <ActivityIndicator color="#facc15" size="large" />
+            <Text style={styles.searchingText}>Buscando recetas...</Text>
+          </View>
+        ) : null}
 
         {results.length > 0 ? (
           <FlatList
@@ -82,14 +110,14 @@ const SearchScreen = () => {
               </Text>
             }
           ></FlatList>
-        ) : (
+        ) : !isSearching ? (
           <View className="flex-row justify-center ">
             <Image
               source={require("@/assets/images/logo.png")}
               className="h-96 w-96"
             />
           </View>
-        )}
+        ) : null}
       </SafeAreaView>
     </ImageBackground>
   );
@@ -101,6 +129,11 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+  },
+  searchingText: {
+    color: "white",
+    fontSize: 16,
+    marginTop: 12,
   },
 });
 

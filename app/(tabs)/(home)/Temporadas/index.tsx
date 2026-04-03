@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   ImageBackground,
   ScrollView,
   StatusBar,
@@ -8,20 +9,25 @@ import {
   Image,
 } from "react-native";
 
-import { recipeData } from "@/data/recetario";
 import { temporadas } from "@/data/temporadas";
 
-import React, { useLayoutEffect } from "react";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import Recetas from "@/components/Recetas";
+import { useSQLiteContext } from "expo-sqlite";
+import { getRecipesBySeason } from "@/lib/recipes-db";
+import type { Recipe } from "@/types/recipe";
 
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 
-const index = () => {
+const SeasonScreen = () => {
+  const db = useSQLiteContext();
   const { temporada } = useLocalSearchParams();
+  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
 
   const numTemporada = parseInt(temporada as string, 10); // Parse the temporada correctly
 
@@ -29,21 +35,53 @@ const index = () => {
     (temp) => temp.temporada === numTemporada
   );
 
-  if (!filteredTemporada) {
-    return null;
-  }
-
-  const filteredRecipes = recipeData.filter(
-    (recipe) => recipe.temporada === numTemporada
-  );
-  const router = useRouter();
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
+    if (!filteredTemporada) {
+      return;
+    }
+
     navigation.setOptions({
       title: `Temporada ${filteredTemporada.temporada}`,
     });
-  }, [navigation, filteredTemporada.temporada]);
+  }, [filteredTemporada, navigation]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadRecipes = async () => {
+      if (Number.isNaN(numTemporada)) {
+        setFilteredRecipes([]);
+        setIsLoadingRecipes(false);
+        return;
+      }
+
+      setIsLoadingRecipes(true);
+
+      try {
+        const recipes = await getRecipesBySeason(db, numTemporada);
+
+        if (isMounted) {
+          setFilteredRecipes(recipes);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingRecipes(false);
+        }
+      }
+    };
+
+    loadRecipes();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [db, numTemporada]);
+
+  if (!filteredTemporada) {
+    return null;
+  }
 
   return (
     <ImageBackground
@@ -96,14 +134,21 @@ const index = () => {
           ))}
           <Text style={styles.seasonText2}>Resumen:</Text>
           <Text style={styles.seasonText}>{filteredTemporada.resumen}</Text>
-          <Recetas meals={filteredRecipes} />
+          {isLoadingRecipes ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator color="#facc15" size="large" />
+              <Text style={styles.loadingText}>Cargando recetas...</Text>
+            </View>
+          ) : (
+            <Recetas meals={filteredRecipes} />
+          )}
         </View>
       </ScrollView>
     </ImageBackground>
   );
 };
 
-export default index;
+export default SeasonScreen;
 
 const styles = StyleSheet.create({
   seasonInfo: {
@@ -138,5 +183,15 @@ const styles = StyleSheet.create({
     fontSize: hp(2),
     color: "white",
     marginLeft: 10,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 24,
+  },
+  loadingText: {
+    color: "white",
+    fontSize: hp(2),
+    marginTop: 12,
   },
 });
